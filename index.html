@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DZ Escrow - منصة الضمان الرقمي</title>
+    <title>DZ Escrow Market</title>
     <!-- سكربت تليجرام الرسمي للربط البرمجي -->
     <script src="https://telegram.org"></script>
     <style>
@@ -32,7 +32,6 @@
             font-size: 14px;
         }
 
-        /* الهيدر علوي */
         .app-header {
             text-align: center;
             padding: 15px;
@@ -44,7 +43,6 @@
         .app-header h1 { font-size: 1.5rem; margin-bottom: 5px; }
         .app-header p { color: var(--hint-color); font-size: 0.85rem; }
 
-        /* التبويب والتنقل */
         .tabs {
             display: flex;
             gap: 8px;
@@ -66,24 +64,20 @@
             color: var(--btn-text-color);
         }
 
-        /* الأقسام الجسدية */
         .app-section { display: none; }
         .app-section.active { display: block; }
 
-        /* بطاقات المنتجات */
         .product-card {
             background-color: var(--card-bg);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 12px;
-            position: relative;
             border: 1px solid rgba(255,255,255,0.05);
         }
         .product-card h3 { font-size: 1.1rem; margin-bottom: 5px; }
         .product-card .price { color: var(--success-color); font-size: 1.2rem; font-weight: bold; margin: 8px 0; }
         .product-card .seller-info { color: var(--hint-color); font-size: 0.8rem; margin-bottom: 10px; }
 
-        /* الأزرار والحقول */
         .btn-main {
             width: 100%;
             padding: 12px;
@@ -108,7 +102,7 @@
 
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 6px; color: var(--hint-color); }
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -118,7 +112,6 @@
             font-size: 1rem;
         }
 
-        /* نافذة الدفع والـ Escrow */
         .rip-box {
             background: #2c3e50;
             padding: 12px;
@@ -129,7 +122,7 @@
             color: #ffeb3b;
             margin: 10px 0;
             letter-spacing: 1px;
-            user-select: all;
+            cursor: pointer;
         }
         .escrow-steps {
             background: rgba(255,255,255,0.02);
@@ -139,36 +132,34 @@
             color: var(--hint-color);
             margin-top: 10px;
         }
-        .escrow-steps li { margin-right: 15px; margin-bottom: 4px; }
+        .escrow-steps li { margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <!-- الهيدر الموحد -->
     <div class="app-header">
         <h1>🇩🇿 DZ Escrow Market</h1>
-        <p id="welcome-msg">جاري تحميل بيانات تليجرام...</p>
+        <p id="welcome-msg">مرحباً بك في سوق الضمان</p>
     </div>
 
-    <!-- أزرار التنقل الرئيسية -->
     <div class="tabs">
         <button class="tab-btn active" id="btn-tab-shop" onclick="showSection('shop')">المتجر الرقمي</button>
         <button class="tab-btn" id="btn-tab-merchant" onclick="showSection('merchant')">لوحة التاجر</button>
     </div>
-    
-    <!-- 🛒 قسم المتجر وتصفح المنتجات -->
+
+    <!-- قسم المتجر -->
     <div id="section-shop" class="app-section active">
         <div id="products-list"></div>
     </div>
 
-    <!-- 📦 قسم التاجر لإدارة المنتجات -->
+    <!-- قسم التاجر -->
     <div id="section-merchant" class="app-section">
         <div class="product-card">
-            <h3 style="margin-bottom: 12px;">➕ نشر منتج رقمي في نظام الضمان</h3>
+            <h3 style="margin-bottom: 12px;">➕ نشر منتج رقمي جديد</h3>
             <form id="product-form" onsubmit="saveProduct(event)">
                 <div class="form-group">
                     <label>اسم المنتج الرقمي</label>
-                    <input type="text" id="p-name" required placeholder="مثال: مفتاح تفعيل Windows 11 Pro">
+                    <input type="text" id="p-name" required placeholder="مثال: حساب Netflix Premium">
                 </div>
                 <div class="form-group">
                     <label>السعر بالدينار الجزائري (DA)</label>
@@ -181,10 +172,10 @@
         <div id="my-products-list"></div>
     </div>
 
-    <!-- 💳 قسم نموذج طلب الشراء ونظام معالجة دفع بريدي موب -->
+    <!-- قسم الدفع والـ Checkout -->
     <div id="section-checkout" class="app-section">
         <div class="product-card">
-            <h3 id="checkout-title">تأكيد طلب الشراء والـ Escrow</h3>
+            <h3 id="checkout-title">تأكيد طلب الشراء</h3>
             <div class="price" id="checkout-price">0 DA</div>
             
             <form id="checkout-form" onsubmit="submitEscrowOrder(event)">
@@ -201,52 +192,71 @@
                     <input type="text" id="order-username" required placeholder="@username">
                 </div>
 
-                <!-- معلومات الـ RIP المحددة لبريدي موب -->
                 <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                    <label style="color: var(--success-color); font-weight: bold;">💳 معلومات الدفع الفوري (BaridiMob / CCP):</label>
-                    <p style="font-size: 0.85rem; margin-top: 5px;">قم بتحويل المبلغ بالدقة للرقم التالي ثم ارفع صورة الوصل:</p>
-                    <div class="rip-box" onclick="navigator.clipboard.writeText('00799999002478845197'); alert('تم نسخ الـ RIP بنجاح');">
-                        00799999002478845197
-                    </div>
-                    <p style="font-size: 0.75rem; text-align: center; color: var(--hint-color);">(اضغط على الرقم الفوق لنسخه مباشرة)</p>
+                    <label style="color: var(--success-color); font-weight: bold;">💳 الدفع عبر BaridiMob / CCP:</label>
+                    <div class="rip-box" onclick="alert('تم نسخ الـ RIP');">00799999002478845197</div>
                 </div>
 
                 <div class="form-group" style="margin-top: 12px;">
-                    <label>إثبات التحويل الرقمي (اسم المرسل أو كود التحويل الحركي)</label>
-                    <input type="text" id="order-proof" required placeholder="اكتب هنا اسم صاحب حساب بريدي موب المرسل">
-                </div>
-
-                <div class="escrow-steps">
-                    <strong>🛡️ مسار حماية الـ Escrow للعملية:</strong>
-                    <ol>
-                        <li>يتم تجميد أموالك فورياً في حساب الوسيط الآمن.</li>
-                        <li>يتحقق المشرف من وصول الدفعة ويأمر البائع بالتسليم.</li>
-                        <li>لا يتم تحرير المال للتاجر إلا بعد تأكيدك للاستلام والتشغيل.</li>
-                    </ol>
+                    <label>اسم صاحب حساب بريدي موب المرسل</label>
+                    <input type="text" id="order-proof" required placeholder="اكتب الاسم هنا">
                 </div>
 
                 <button type="submit" class="btn-main" style="margin-top: 15px; background-color: var(--success-color);">إرسال الطلب وإبلاغ البوت</button>
-                <button type="button" class="btn-main" style="margin-top: 8px; background-color: #555;" onclick="showSection('shop')">إلغاء والعودة للمتجر</button>
+                <button type="button" class="btn-main" style="margin-top: 8px; background-color: #555;" onclick="showSection('shop')">إلغاء والعودة</button>
             </form>
         </div>
     </div>
 
     <script>
-        // تفعيل وتوسيع مكتبة تليجرام ويب آب
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
-        // جلب مستخدم تليجرام الفعلي للتخصيص الآلي للبيانات المعروضة
         const teleUser = tg.initDataUnsafe?.user;
         if (teleUser) {
-            document.getElementById('welcome-msg').innerText = `مرحباً، ${teleUser.first_name || ''} (@${teleUser.username || 'بدون_يوزر'})`;
+            document.getElementById('welcome-msg').innerText = `مرحباً، ${teleUser.first_name || ''}`;
             document.getElementById('order-username').value = teleUser.username ? `@${teleUser.username}` : '';
             document.getElementById('order-name').value = `${teleUser.first_name || ''} ${teleUser.last_name || ''}`.trim();
-        } else {
-            document.getElementById('welcome-msg').innerText = "منصة الضمان الاجتماعي للمنتجات الرقمية";
         }
 
-        // قاعدة البيانات المحلية الأولية للمنتجات
         let defaultProducts = [
-            { id: "1", name: "حساب Netflix Premium شاشة شغال شهري", price: 1300, seller: "Amine_Tech" },
+            { id: "1", name: "حساب Netflix Premium شاشة شهري", price: 1300, seller: "Amine_Tech" },
+            { id: "2", name: "كود تفعيل Kaspersky Antivirus سنة كاملة", price: 2200, seller: "Dz_Soft" }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('dz_escrow_products')) || defaultProducts;
+        if(!localStorage.getItem('dz_escrow_products')) {
+            localStorage.setItem('dz_escrow_products', JSON.stringify(products));
+        }
+
+        let currentSelectedProduct = null;
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`section-${sectionId}`).classList.add('active');
+            
+            const activeTab = document.getElementById(`btn-tab-${sectionId}`);
+            if(activeTab) activeTab.classList.add('active');
+            
+            if(sectionId === 'shop') renderShop();
+            if(sectionId === 'merchant') renderMerchant();
+        }
+
+        function renderShop() {
+            const container = document.getElementById('products-list');
+            container.innerHTML = '';
+            products.forEach(prod => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <h3>${prod.name}</h3>
+                        <div class="seller-info">البائع: @${prod.seller}</div>
+                        <div class="price">${prod.price} DA</div>
+                        <button class="btn-main" onclick="openCheckout('${prod.id}')">اطلب عبر الوسيط (Escrow)</button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderMerchant() {
