@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DZ Escrow - منصة الضمان الرقمي</title>
+    <!-- سكربت تليجرام الرسمي للربط البرمجي -->
+    <script src="https://telegram.org"></script>
+    <style>
+        :root {
+            --bg-color: #17212b;
+            --text-color: #f5f5f5;
+            --btn-color: #2481cc;
+            --btn-text-color: #ffffff;
+            --hint-color: #708499;
+            --card-bg: #202b36;
+            --success-color: #4cd964;
+            --danger-color: #e53935;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        /* الهيدر علوي */
+        .app-header {
+            text-align: center;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .app-header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .app-header p { color: var(--hint-color); font-size: 0.85rem; }
+
+        /* التبويب والتنقل */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--btn-color);
+            color: var(--btn-text-color);
+        }
+
+        /* الأقسام الجسدية */
+        .app-section { display: none; }
+        .app-section.active { display: block; }
+
+        /* بطاقات المنتجات */
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .product-card h3 { font-size: 1.1rem; margin-bottom: 5px; }
+        .product-card .price { color: var(--success-color); font-size: 1.2rem; font-weight: bold; margin: 8px 0; }
+        .product-card .seller-info { color: var(--hint-color); font-size: 0.8rem; margin-bottom: 10px; }
+
+        /* الأزرار والحقول */
+        .btn-main {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--btn-color);
+            color: var(--btn-text-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-danger {
+            background-color: var(--danger-color);
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--hint-color); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        /* نافذة الدفع والـ Escrow */
+        .rip-box {
+            background: #2c3e50;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #ffeb3b;
+            margin: 10px 0;
+            letter-spacing: 1px;
+            user-select: all;
+        }
+        .escrow-steps {
+            background: rgba(255,255,255,0.02);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--hint-color);
+            margin-top: 10px;
+        }
+        .escrow-steps li { margin-right: 15px; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- الهيدر الموحد -->
+    <div class="app-header">
+        <h1>🇩🇿 DZ Escrow Market</h1>
+        <p id="welcome-msg">جاري تحميل بيانات تليجرام...</p>
+    </div>
+
+    <!-- أزرار التنقل الرئيسية -->
+    <div class="tabs">
+        <button class="tab-btn active" id="btn-tab-shop" onclick="showSection('shop')">المتجر الرقمي</button>
+        <button class="tab-btn" id="btn-tab-merchant" onclick="showSection('merchant')">لوحة التاجر</button>
+    </div>
+
+    <!-- 🛒 قسم المتجر وتصفح المنتجات -->
+    <div id="section-shop" class="app-section active">
+        <div id="products-list"></div>
+    </div>
+
+    <!-- 📦 قسم التاجر لإدارة المنتجات -->
+    <div id="section-merchant" class="app-section">
+        <div class="product-card">
+            <h3 style="margin-bottom: 12px;">➕ نشر منتج رقمي في نظام الضمان</h3>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <div class="form-group">
+                    <label>اسم المنتج الرقمي</label>
+                    <input type="text" id="p-name" required placeholder="مثال: مفتاح تفعيل Windows 11 Pro">
+                </div>
+                <div class="form-group">
+                    <label>السعر بالدينار الجزائري (DA)</label>
+                    <input type="number" id="p-price" required placeholder="مثال: 1500">
+                </div>
+                <button type="submit" class="btn-main">حفظ ونشر فورياً</button>
+            </form>
+        </div>
+        <h3 style="margin: 15px 0 10px 0;">📋 منتجاتك الحالية:</h3>
+        <div id="my-products-list"></div>
+    </div>
+
+    <!-- 💳 قسم نموذج طلب الشراء ونظام معالجة دفع بريدي موب -->
+    <div id="section-checkout" class="app-section">
+        <div class="product-card">
+            <h3 id="checkout-title">تأكيد طلب الشراء والـ Escrow</h3>
+            <div class="price" id="checkout-price">0 DA</div>
+            
+            <form id="checkout-form" onsubmit="submitEscrowOrder(event)">
+                <div class="form-group">
+                    <label>اسمك الكامل</label>
+                    <input type="text" id="order-name" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="tel" id="order-phone" required placeholder="06XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>معرف تليجرام (Username)</label>
+                    <input type="text" id="order-username" required placeholder="@username">
+                </div>
+
+                <!-- معلومات الـ RIP المحددة لبريدي موب -->
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <label style="color: var(--success-color); font-weight: bold;">💳 معلومات الدفع الفوري (BaridiMob / CCP):</label>
+                    <p style="font-size: 0.85rem; margin-top: 5px;">قم بتحويل المبلغ بالدقة للرقم التالي ثم ارفع صورة الوصل:</p>
+                    <div class="rip-box" onclick="navigator.clipboard.writeText('00799999002478845197'); alert('تم نسخ الـ RIP بنجاح');">
+                        00799999002478845197
+                    </div>
+                    <p style="font-size: 0.75rem; text-align: center; color: var(--hint-color);">(اضغط على الرقم الفوق لنسخه مباشرة)</p>
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label>إثبات التحويل الرقمي (اسم المرسل أو كود التحويل الحركي)</label>
+                    <input type="text" id="order-proof" required placeholder="اكتب هنا اسم صاحب حساب بريدي موب المرسل">
+                </div>
+
+                <div class="escrow-steps">
+                    <strong>🛡️ مسار حماية الـ Escrow للعملية:</strong>
+                    <ol>
+                        <li>يتم تجميد أموالك فورياً في حساب الوسيط الآمن.</li>
+                        <li>يتحقق المشرف من وصول الدفعة ويأمر البائع بالتسليم.</li>
+                        <li>لا يتم تحرير المال للتاجر إلا بعد تأكيدك للاستلام والتشغيل.</li>
+                    </ol>
+                </div>
+
+                <button type="submit" class="btn-main" style="margin-top: 15px; background-color: var(--success-color);">إرسال الطلب وإبلاغ البوت</button>
+                <button type="button" class="btn-main" style="margin-top: 8px; background-color: #555;" onclick="showSection('shop')">إلغاء والعودة للمتجر</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // تفعيل وتوسيع مكتبة تليجرام ويب آب
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // جلب مستخدم تليجرام الفعلي للتخصيص الآلي للبيانات المعروضة
+        const teleUser = tg.initDataUnsafe?.user;
+        if (teleUser) {
+            document.getElementById('welcome-msg').innerText = `مرحباً، ${teleUser.first_name || ''} (@${teleUser.username || 'بدون_يوزر'})`;
+            document.getElementById('order-username').value = teleUser.username ? `@${teleUser.username}` : '';
+            document.getElementById('order-name').value = `${teleUser.first_name || ''} ${teleUser.last_name || ''}`.trim();
+        } else {
+            document.getElementById('welcome-msg').innerText = "منصة الضمان الاجتماعي للمنتجات الرقمية";
+        }
+
+        // قاعدة البيانات المحلية الأولية للمنتجات
+        let defaultProducts = [
+            { id: "1", name: "حساب Netflix Premium شاشة شغال شهري", price: 1300, seller: "Amine_Tech" },
