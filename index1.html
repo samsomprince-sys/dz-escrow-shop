@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DZ Escrow Market</title>
+    <!-- سكربت تليجرام الرسمي للربط البرمجي -->
+    <script src="https://telegram.org"></script>
+    <style>
+        :root {
+            --bg-color: #17212b;
+            --text-color: #f5f5f5;
+            --btn-color: #2481cc;
+            --btn-text-color: #ffffff;
+            --hint-color: #708499;
+            --card-bg: #202b36;
+            --success-color: #4cd964;
+            --danger-color: #e53935;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .app-header {
+            text-align: center;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .app-header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .app-header p { color: var(--hint-color); font-size: 0.85rem; }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--btn-color);
+            color: var(--btn-text-color);
+        }
+
+        .app-section { display: none; }
+        .app-section.active { display: block; }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .product-card h3 { font-size: 1.1rem; margin-bottom: 5px; }
+        .product-card .price { color: var(--success-color); font-size: 1.2rem; font-weight: bold; margin: 8px 0; }
+        .product-card .seller-info { color: var(--hint-color); font-size: 0.8rem; margin-bottom: 10px; }
+
+        .btn-main {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--btn-color);
+            color: var(--btn-text-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-danger {
+            background-color: var(--danger-color);
+            padding: 6px 12px;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--hint-color); }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .rip-box {
+            background: #2c3e50;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #ffeb3b;
+            margin: 10px 0;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .escrow-steps {
+            background: rgba(255,255,255,0.02);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--hint-color);
+            margin-top: 10px;
+        }
+        .escrow-steps li { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <h1>🇩🇿 DZ Escrow Market</h1>
+        <p id="welcome-msg">مرحباً بك في سوق الضمان</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="btn-tab-shop" onclick="showSection('shop')">المتجر الرقمي</button>
+        <button class="tab-btn" id="btn-tab-merchant" onclick="showSection('merchant')">لوحة التاجر</button>
+    </div>
+
+    <!-- قسم المتجر -->
+    <div id="section-shop" class="app-section active">
+        <div id="products-list"></div>
+    </div>
+
+    <!-- قسم التاجر -->
+    <div id="section-merchant" class="app-section">
+        <div class="product-card">
+            <h3 style="margin-bottom: 12px;">➕ نشر منتج رقمي جديد</h3>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <div class="form-group">
+                    <label>اسم المنتج الرقمي</label>
+                    <input type="text" id="p-name" required placeholder="مثال: حساب Netflix Premium">
+                </div>
+                <div class="form-group">
+                    <label>السعر بالدينار الجزائري (DA)</label>
+                    <input type="number" id="p-price" required placeholder="مثال: 1500">
+                </div>
+                <button type="submit" class="btn-main">حفظ ونشر فورياً</button>
+            </form>
+        </div>
+        <h3 style="margin: 15px 0 10px 0;">📋 منتجاتك الحالية:</h3>
+        <div id="my-products-list"></div>
+    </div>
+
+    <!-- قسم الدفع والـ Checkout -->
+    <div id="section-checkout" class="app-section">
+        <div class="product-card">
+            <h3 id="checkout-title">تأكيد طلب الشراء</h3>
+            <div class="price" id="checkout-price">0 DA</div>
+            
+            <form id="checkout-form" onsubmit="submitEscrowOrder(event)">
+                <div class="form-group">
+                    <label>اسمك الكامل</label>
+                    <input type="text" id="order-name" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="tel" id="order-phone" required placeholder="06XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>معرف تليجرام (Username)</label>
+                    <input type="text" id="order-username" required placeholder="@username">
+                </div>
+
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <label style="color: var(--success-color); font-weight: bold;">💳 الدفع عبر BaridiMob / CCP:</label>
+                    <div class="rip-box" onclick="alert('تم نسخ الـ RIP');">00799999002478845197</div>
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label>اسم صاحب حساب بريدي موب المرسل</label>
+                    <input type="text" id="order-proof" required placeholder="اكتب الاسم هنا">
+                </div>
+
+                <button type="submit" class="btn-main" style="margin-top: 15px; background-color: var(--success-color);">إرسال الطلب وإبلاغ البوت</button>
+                <button type="button" class="btn-main" style="margin-top: 8px; background-color: #555;" onclick="showSection('shop')">إلغاء والعودة</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const teleUser = tg.initDataUnsafe?.user;
+        if (teleUser) {
+            document.getElementById('welcome-msg').innerText = `مرحباً، ${teleUser.first_name || ''}`;
+            document.getElementById('order-username').value = teleUser.username ? `@${teleUser.username}` : '';
+            document.getElementById('order-name').value = `${teleUser.first_name || ''} ${teleUser.last_name || ''}`.trim();
+        }
+
+        let defaultProducts = [
+            { id: "1", name: "حساب Netflix Premium شاشة شهري", price: 1300, seller: "Amine_Tech" },
+            { id: "2", name: "كود تفعيل Kaspersky Antivirus سنة كاملة", price: 2200, seller: "Dz_Soft" }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('dz_escrow_products')) || defaultProducts;
+        if(!localStorage.getItem('dz_escrow_products')) {
+            localStorage.setItem('dz_escrow_products', JSON.stringify(products));
+        }
+
+        let currentSelectedProduct = null;
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`section-${sectionId}`).classList.add('active');
+            
+            const activeTab = document.getElementById(`btn-tab-${sectionId}`);
+            if(activeTab) activeTab.classList.add('active');
+            
+            if(sectionId === 'shop') renderShop();
+            if(sectionId === 'merchant') renderMerchant();
+        }
+
+        function renderShop() {
+            const container = document.getElementById('products-list');
+            container.innerHTML = '';
+            products.forEach(prod => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <h3>${prod.name}</h3>
+                        <div class="seller-info">البائع: @${prod.seller}</div>
+                        <div class="price">${prod.price} DA</div>
+                        <button class="btn-main" onclick="openCheckout('${prod.id}')">اطلب عبر الوسيط (Escrow)</button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderMerchant() {
