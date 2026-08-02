@@ -3,260 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DZ Escrow Market</title>
-    <!-- سكربت تليجرام الرسمي للربط البرمجي -->
+    <title>متجر الجزائر - Escrow Server Mode</title>
     <script src="https://telegram.org"></script>
     <style>
         :root {
-            --bg-color: #17212b;
-            --text-color: #f5f5f5;
-            --btn-color: #2481cc;
-            --btn-text-color: #ffffff;
-            --hint-color: #708499;
-            --card-bg: #202b36;
-            --success-color: #4cd964;
-            --danger-color: #e53935;
+            --bg-color: #182533; --text-color: #ffffff; --hint-color: #7e91a4;
+            --btn-color: #2f6ea5; --secondary-bg: #101921;
         }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 15px;
-            font-size: 14px;
-        }
-
-        .app-header {
-            text-align: center;
-            padding: 15px;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .app-header h1 { font-size: 1.5rem; margin-bottom: 5px; }
-        .app-header p { color: var(--hint-color); font-size: 0.85rem; }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .tab-btn.active {
-            background-color: var(--btn-color);
-            color: var(--btn-text-color);
-        }
-
-        .app-section { display: none; }
-        .app-section.active { display: block; }
-
-        .product-card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .product-card h3 { font-size: 1.1rem; margin-bottom: 5px; }
-        .product-card .price { color: var(--success-color); font-size: 1.2rem; font-weight: bold; margin: 8px 0; }
-        .product-card .seller-info { color: var(--hint-color); font-size: 0.8rem; margin-bottom: 10px; }
-
-        .btn-main {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--btn-color);
-            color: var(--btn-text-color);
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .btn-danger {
-            background-color: var(--danger-color);
-            padding: 6px 12px;
-            border-radius: 5px;
-            border: none;
-            color: white;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 6px; color: var(--hint-color); }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 1rem;
-        }
-
-        .rip-box {
-            background: #2c3e50;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-family: monospace;
-            font-size: 1.1rem;
-            color: #ffeb3b;
-            margin: 10px 0;
-            letter-spacing: 1px;
-            cursor: pointer;
-        }
-        .escrow-steps {
-            background: rgba(255,255,255,0.02);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: var(--hint-color);
-            margin-top: 10px;
-        }
-        .escrow-steps li { margin-bottom: 4px; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); padding: 15px; margin: 0; }
+        .nav-tabs { display: flex; background: var(--secondary-bg); padding: 5px; border-radius: 8px; margin-bottom: 20px; }
+        .tab-btn { width: 50%; background: none; border: none; color: var(--hint-color); padding: 10px; font-weight: bold; cursor: pointer; }
+        .tab-btn.active { background: var(--btn-color); color: #fff; border-radius: 6px; }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+        .product-card { background: var(--secondary-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn { background: var(--btn-color); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-danger { background: #e53935; }
+        .form-control { width: 100%; padding: 10px; margin-bottom: 10px; background: var(--secondary-bg); color: white; border: 1px solid #233142; border-radius: 5px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+        .modal-content { background: var(--bg-color); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; }
     </style>
 </head>
 <body>
 
-    <div class="app-header">
-        <h1>🇩🇿 DZ Escrow Market</h1>
-        <p id="welcome-msg">مرحباً بك في سوق الضمان</p>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('buyer')">المتجر</button>
+        <button class="tab-btn" onclick="switchTab('merchant')">لوحة التاجر</button>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" id="btn-tab-shop" onclick="showSection('shop')">المتجر الرقمي</button>
-        <button class="tab-btn" id="btn-tab-merchant" onclick="showSection('merchant')">لوحة التاجر</button>
+    <div id="buyer" class="tab-content active">
+        <h3>المنتجات المتوفرة (من السيرفر)</h3>
+        <div id="buyer-list">جاري تحميل المنتجات الحية...</div>
     </div>
 
-    <!-- قسم المتجر -->
-    <div id="section-shop" class="app-section active">
-        <div id="products-list"></div>
+    <div id="merchant" class="tab-content">
+        <h3>إضافة منتج جديد بالسيرفر</h3>
+        <input type="text" id="p-name" class="form-control" placeholder="اسم المنتج">
+        <input type="number" id="p-price" class="form-control" placeholder="السعر بالدينار DA">
+        <button class="btn" style="width:100%;" onclick="addProductToServer()">إضافة إلى السيرفر العام</button>
+        <h3>المنتجات المتاحة للحذف</h3>
+        <div id="merchant-list">جاري التحميل...</div>
     </div>
 
-    <!-- قسم التاجر -->
-    <div id="section-merchant" class="app-section">
-        <div class="product-card">
-            <h3 style="margin-bottom: 12px;">➕ نشر منتج رقمي جديد</h3>
-            <form id="product-form" onsubmit="saveProduct(event)">
-                <div class="form-group">
-                    <label>اسم المنتج الرقمي</label>
-                    <input type="text" id="p-name" required placeholder="مثال: حساب Netflix Premium">
-                </div>
-                <div class="form-group">
-                    <label>السعر بالدينار الجزائري (DA)</label>
-                    <input type="number" id="p-price" required placeholder="مثال: 1500">
-                </div>
-                <button type="submit" class="btn-main">حفظ ونشر فورياً</button>
-            </form>
-        </div>
-        <h3 style="margin: 15px 0 10px 0;">📋 منتجاتك الحالية:</h3>
-        <div id="my-products-list"></div>
-    </div>
-
-    <!-- قسم الدفع والـ Checkout -->
-    <div id="section-checkout" class="app-section">
-        <div class="product-card">
-            <h3 id="checkout-title">تأكيد طلب الشراء</h3>
-            <div class="price" id="checkout-price">0 DA</div>
-            
-            <form id="checkout-form" onsubmit="submitEscrowOrder(event)">
-                <div class="form-group">
-                    <label>اسمك الكامل</label>
-                    <input type="text" id="order-name" required>
-                </div>
-                <div class="form-group">
-                    <label>رقم الهاتف</label>
-                    <input type="tel" id="order-phone" required placeholder="06XXXXXXXX">
-                </div>
-                <div class="form-group">
-                    <label>معرف تليجرام (Username)</label>
-                    <input type="text" id="order-username" required placeholder="@username">
-                </div>
-
-                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                    <label style="color: var(--success-color); font-weight: bold;">💳 الدفع عبر BaridiMob / CCP:</label>
-                    <div class="rip-box" onclick="alert('تم نسخ الـ RIP');">00799999002478845197</div>
-                </div>
-
-                <div class="form-group" style="margin-top: 12px;">
-                    <label>اسم صاحب حساب بريدي موب المرسل</label>
-                    <input type="text" id="order-proof" required placeholder="اكتب الاسم هنا">
-                </div>
-
-                <button type="submit" class="btn-main" style="margin-top: 15px; background-color: var(--success-color);">إرسال الطلب وإبلاغ البوت</button>
-                <button type="button" class="btn-main" style="margin-top: 8px; background-color: #555;" onclick="showSection('shop')">إلغاء والعودة</button>
-            </form>
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <h3>تأكيد الدفع (Escrow)</h3>
+            <p>قم بتحويل المبلغ إلى حساب BaridiMob التالي:</p>
+            <div style="background:#101921; padding:10px; text-align:center; color:#ffb74d; font-weight:bold; font-size:18px; margin-bottom:15px;">00799999002478845197</div>
+            <input type="text" id="b-name" class="form-control" placeholder="اسمك الكامل">
+            <input type="text" id="b-phone" class="form-control" placeholder="رقم هاتفك">
+            <button class="btn" onclick="sendOrder()">إرسال الطلب للمشرف المعلق</button>
+            <button class="btn btn-danger" onclick="closeModal()">إلغاء</button>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+                // التأكد من وجود تليجرام أولاً لحماية الكود من التوقف خارج التطبيق
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null; 
+        if(tg) tg.expand();
 
-        const teleUser = tg.initDataUnsafe?.user;
-        if (teleUser) {
-            document.getElementById('welcome-msg').innerText = `مرحباً، ${teleUser.first_name || ''}`;
-            document.getElementById('order-username').value = teleUser.username ? `@${teleUser.username}` : '';
-            document.getElementById('order-name').value = `${teleUser.first_name || ''} ${teleUser.last_name || ''}`.trim();
+        
+        // ⚠️ استبدل هذا الرابط برابط الـ Ngrok التابع للمنفذ 3000 الخاص بالـ Backend
+        const API_URL = window.location.origin; 
+        
+        let products = [];
+        let selectedProduct = null;
+
+                // دالة جلب البيانات الذكية بعد تنظيف روابط تليجرام
+        async function fetchProducts() {
+            try {
+                // تنظيف الرابط وإزالة أي علامة مائلة زائدة من النهاية
+                let cleanUrl = window.location.origin.replace(/\/$/, "");
+                
+                const res = await fetch(`${cleanUrl}/api/products`);
+                products = await res.json();
+                render();
+            } catch (err) {
+                document.getElementById('buyer-list').innerText = "خطأ في الاتصال بالسيرفر الخلفي.";
+            }
         }
 
-        let defaultProducts = [
-            { id: "1", name: "حساب Netflix Premium شاشة شهري", price: 1300, seller: "Amine_Tech" },
-            { id: "2", name: "كود تفعيل Kaspersky Antivirus سنة كاملة", price: 2200, seller: "Dz_Soft" }
-        ];
 
-        let products = JSON.parse(localStorage.getItem('dz_escrow_products')) || defaultProducts;
-        if(!localStorage.getItem('dz_escrow_products')) {
-            localStorage.setItem('dz_escrow_products', JSON.stringify(products));
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.currentTarget.classList.add('active');
+            fetchProducts();
         }
 
-        let currentSelectedProduct = null;
+        function render() {
+            const bList = document.getElementById('buyer-list'); const mList = document.getElementById('merchant-list');
+            bList.innerHTML = ''; mList.innerHTML = '';
+            
+            if(products.length === 0) {
+                bList.innerHTML = "<p style='text-align:center;color:var(--hint-color)'>لا توجد منتجات حالياً.</p>";
+                return;
+            }
 
-        function showSection(sectionId) {
-            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(`section-${sectionId}`).classList.add('active');
-            
-            const activeTab = document.getElementById(`btn-tab-${sectionId}`);
-            if(activeTab) activeTab.classList.add('active');
-            
-            if(sectionId === 'shop') renderShop();
-            if(sectionId === 'merchant') renderMerchant();
-        }
-
-        function renderShop() {
-            const container = document.getElementById('products-list');
-            container.innerHTML = '';
-            products.forEach(prod => {
-                container.innerHTML += `
-                    <div class="product-card">
-                        <h3>${prod.name}</h3>
-                        <div class="seller-info">البائع: @${prod.seller}</div>
-                        <div class="price">${prod.price} DA</div>
-                        <button class="btn-main" onclick="openCheckout('${prod.id}')">اطلب عبر الوسيط (Escrow)</button>
-                    </div>
-                `;
+            products.forEach(p => {
+                bList.innerHTML += `<div class="product-card"><div><b>${p.name}</b><br><span style="color:#4caf50">${p.price} DA</span></div><button class="btn" onclick="openModal(${p.id})">اطلب</button></div>`;
+                mList.innerHTML += `<div class="product-card"><div><b>${p.name}</b><br>${p.price} DA</div><button class="btn btn-danger" onclick="deleteProductFromServer(${p.id})">حذف</button></div>`;
             });
         }
 
-        function renderMerchant() {
+        async function addProductToServer() {
+            const name = document.getElementById('p-name').value; const price = document.getElementById('p-price').value;
+            if(!name || !price) return alert('امْلأ الحقول!');
+            
+            await fetch(`${API_URL}/api/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price })
+            });
+
+            document.getElementById('p-name').value = ''; document.getElementById('p-price').value = '';
+            fetchProducts();
+        }
+
+        async function deleteProductFromServer(id) {
+            await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE' });
+            fetchProducts();
+        }
+
+        function openModal(id) { selectedProduct = products.find(p => p.id === id); document.getElementById('payment-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('payment-modal').style.display = 'none'; }
+        
+                        async function sendOrder() {
+            const name = document.getElementById('b-name').value; 
+            const phone = document.getElementById('b-phone').value;
+            if(!name || !phone) return alert('أدخل بياناتك!');
+            
+            const orderData = {
+                product: selectedProduct.name,
+                price: selectedProduct.price,
+                buyer: name,
+                phone: phone
+            };
+
+            // جلب بيانات الأمان المشفرة تلقائياً من تطبيق تليجرام إذا كانت متوفرة
+            const initDataString = tg && tg.initData ? tg.initData : "";
+
+            try {
+                // إرسال الطلب مع حزمة الأمان لحماية السيرفر
+                await fetch(`${API_URL}/api/orders`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'telegram-init-data': initDataString // إرسال مفتاح الأمان للسيرفر لفحصه
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                alert('تم إرسال طلبك بنجاح للمشرف! يرجى مراجعة محادثة البوت.');
+                closeModal();
+                if(tg) tg.close();
+            } catch (err) {
+                alert('خطأ في إرسال الطلب إلى السيرفر الخلفي.');
+            }
+        }
+
+
+
+        // تحميل أولي للمنتجات من السيرفر
+        fetchProducts();
+    </script>
+</body>
+</html>
