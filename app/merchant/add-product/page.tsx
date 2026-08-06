@@ -23,7 +23,6 @@ export default function AddProductPage() {
       .from('products')
       .insert([
         {
-          merchant_id: merchantId,
           title: title,
           description: description,
           base_price_da: parseInt(price),
