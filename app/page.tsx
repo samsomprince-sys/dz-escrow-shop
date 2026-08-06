@@ -31,9 +31,6 @@ export default function HomePage() {
 
         </div>
 
-        {/* أسفل الكارت */}
-        <div className="border-t border-gray-100 pt-4 mt-6 text-xs text-gray-400">
-          النظام محمي ومربوط بقاعدة البيانات الحية بنجاح 🛡️
         </div>
       </div>
     </div>
