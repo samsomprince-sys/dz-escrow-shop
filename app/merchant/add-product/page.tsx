@@ -1,13 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
-
+import { supabase } from '../../lib/supabase';
 
 export default function AddProductPage() {
   const [title, setTitle] = useState('');
@@ -66,7 +60,8 @@ export default function AddProductPage() {
         </div>
 
         <form onSubmit={handleAddProduct} className="space-y-4">
-          {/* اسم المنتج مع تفعيل الكتابة الفورية */}
+          
+          {/* اسم المنتج */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">اسم المنتج الرقمي:</label>
             <input
@@ -74,22 +69,22 @@ export default function AddProductPage() {
               placeholder="مثال: بطاقة فري فاير 210 جوهرة"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 text-right"
+              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 text-right text-black"
             />
           </div>
 
-          {/* وصف المنتج مع تفعيل الكتابة الفورية */}
+          {/* وصف المنتج */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">الوصف والشروط (اختياري):</label>
             <textarea
               placeholder="اكتب شروط تسليم الكود أو تفاصيل الحساب..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 h-24 resize-none text-right"
+              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 h-24 resize-none text-right text-black"
             />
           </div>
 
-          {/* سعر التاجر مع تفعيل الكتابة الفورية وحذف الجملة التوضيحية السفلية تماماً */}
+          {/* سعر المنتج */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">السعر الصافي الخاص بك (بالدج):</label>
             <div className="relative">
@@ -98,7 +93,7 @@ export default function AddProductPage() {
                 placeholder="00.00"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full p-3 pl-12 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 font-bold text-right"
+                className="w-full p-3 pl-12 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 font-bold text-right text-black"
               />
               <span className="absolute left-4 top-3 text-sm font-bold text-gray-400">دج</span>
             </div>
