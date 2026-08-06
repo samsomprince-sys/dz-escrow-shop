@@ -1,21 +1,29 @@
 'use client';
-import Link from 'next/link';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 
 export default function BuyerOrderPage() {
+  const searchParams = useSearchParams();
+  
+  // قراءة رقم الصفقة وسعر المنتج الأصلي القادمين من الرابط مباشرة
+  const orderId = searchParams.get('id') || "68c946cc-c7f8-45be-9bc0-d6ccfb3d0fb1"; 
+  const queryPrice = searchParams.get('price');
+  
+  // تحويل السعر المالي من الرابط إلى رقم، وإذا لم يجد رصيداً يضع 2000 كبديل تلقائي
+  const productPrice = queryPrice ? parseInt(queryPrice) : 2000;
+
   const [proofUrl, setProofUrl] = useState('');
   const [disputeReason, setDisputeReason] = useState('');
   const [sending, setSending] = useState(false);
   const [showDisputeForm, setShowDisputeForm] = useState(false);
 
-  // بيانات تجريبية متوافقة مع قاعدة البيانات
-  const orderId = "68c946cc-c7f8-45be-9bc0-d6ccfb3d0fb1"; 
-  const buyerId = "11111111-1111-1111-1111-111111111111"; 
-  const productPrice = 2000; 
+  // عمولة المنصة الثابتة على المشتري حسب شروطك الصارمة
   const buyerFee = 500; 
   const totalAmount = productPrice + buyerFee;
+
+  const buyerId = "11111111-1111-1111-1111-111111111111"; 
 
   async function handleSubmitOrder() {
     if (!proofUrl) {
@@ -50,20 +58,21 @@ export default function BuyerOrderPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center justify-center" dir="rtl">
-  {/* زر الرجوع للرئيسية */}
-  <div className="w-full max-w-md mb-4 text-right">
-    <Link href="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">
-      ← العودة للصفحة الرئيسية للمنصة
-    </Link>
-  </div>
+      
+      {/* زر العودة للرئيسية */}
+      <div className="w-full max-w-md mb-4 text-right">
+        <a href="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">
+          ← العودة للصفحة الرئيسية للمنصة
+        </a>
+      </div>
 
-      <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-        <h1 className="text-xl font-bold text-gray-800 mb-4">فاتورة الشراء وتأكيد الدفع 🛒</h1>
+      <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100 text-right">
+        <h1 className="text-xl font-bold text-gray-800 mb-4 text-center">فاتورة الشراء وتأكيد الدفع 🛒</h1>
         
         <div className="space-y-2 border-b border-gray-100 pb-4 mb-4 text-sm text-gray-600">
           <div className="flex justify-between">
             <span>سعر المنتج الرقمي الأصلي:</span>
-            <span>{productPrice} دج</span>
+            <span className="font-bold text-gray-800">{productPrice} دج</span>
           </div>
           <div className="flex justify-between text-blue-600 font-medium">
             <span>رسوم عمليات المنصة والخصوصية:</span>
@@ -71,7 +80,7 @@ export default function BuyerOrderPage() {
           </div>
           <div className="flex justify-between font-bold text-base text-gray-800 pt-2 border-t border-dashed">
             <span>المبلغ الإجمالي المطلوب تحويله:</span>
-            <span className="text-green-600">{totalAmount} دج</span>
+            <span className="text-green-600 text-lg">{totalAmount} دج</span>
           </div>
         </div>
 
@@ -82,7 +91,7 @@ export default function BuyerOrderPage() {
             placeholder="انسخ رابط الصورة هنا بعد رفعها"
             value={proofUrl}
             onChange={(e) => setProofUrl(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-blue-500 bg-gray-50"
+            className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-blue-500 bg-gray-50 text-right text-black"
           />
         </div>
 
@@ -109,7 +118,7 @@ export default function BuyerOrderPage() {
                 placeholder="مثال: الكود الرقمي لا يعمل أو التاجر لم يسلمني الحساب..."
                 value={disputeReason}
                 onChange={(e) => setDisputeReason(e.target.value)}
-                className="w-full p-3 border border-red-300 rounded-xl text-xs bg-white h-20 resize-none focus:outline-none"
+                className="w-full p-3 border border-red-300 rounded-xl text-xs bg-white h-20 resize-none focus:outline-none text-right text-black"
               />
               <div className="flex gap-2 mt-3">
                 <button
