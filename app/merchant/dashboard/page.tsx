@@ -39,11 +39,18 @@ export default function MerchantDashboard() {
     </Link>
   </div>
 
-      {/* رأس الصفحة */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 text-right">
-        <h1 className="text-2xl font-bold text-gray-800">لوحة تحكم التاجر المالي</h1>
-        <p className="text-sm text-gray-500 mt-1">مرحباً بك! هنا تظهر مستحقاتك الصافية بعد خصم عمولة المنصة التلقائية (500 دج).</p>
-      </div>
+         {/* رأس الصفحة */}
+   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 text-right flex justify-between items-center">
+     <div>
+       <h1 className="text-2xl font-bold text-gray-800">لوحة تحكم التاجر المالي</h1>
+       <p className="text-sm text-gray-500 mt-1">مرحباً بك! هنا تظهر مستحقاتك الصافية بعد خصم عمولة المنصة التلقائية (500 دج).</p>
+     </div>
+     {/* زر إضافة منتج رقمي جديد للتاجر */}
+     <Link href="/merchant/add-product" className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-5 rounded-xl transition-all shadow-sm text-xs">
+       🎮 إضافة منتج رقمي جديد
+     </Link>
+   </div>
+
 
       {/* بطاقات عرض الرصيد الافتراضي بناءً على شرطك */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
