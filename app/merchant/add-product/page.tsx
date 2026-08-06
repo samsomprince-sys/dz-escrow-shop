@@ -44,7 +44,15 @@ export default function AddProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center justify-center" dir="rtl">
+      
+      {/* زر العودة للرئيسية */}
+      <div className="w-full max-w-md mb-4 text-right">
+        <a href="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-green-600 transition-colors">
+          ← العودة للصفحة الرئيسية للمنصة
+        </a>
+      </div>
+
       <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100 text-right">
         <div className="mb-6 border-b border-gray-100 pb-4">
           <h1 className="text-xl font-bold text-gray-800">إضافة منتج رقمي جديد 🎮</h1>
@@ -52,6 +60,7 @@ export default function AddProductPage() {
         </div>
 
         <form onSubmit={handleAddProduct} className="space-y-4">
+          {/* اسم المنتج مع تفعيل الكتابة الفورية */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">اسم المنتج الرقمي:</label>
             <input
@@ -63,6 +72,7 @@ export default function AddProductPage() {
             />
           </div>
 
+          {/* وصف المنتج مع تفعيل الكتابة الفورية */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">الوصف والشروط (اختياري):</label>
             <textarea
@@ -73,6 +83,7 @@ export default function AddProductPage() {
             />
           </div>
 
+          {/* سعر التاجر مع تفعيل الكتابة الفورية وحذف الجملة التوضيحية السفلية تماماً */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">السعر الصافي الخاص بك (بالدج):</label>
             <div className="relative">
@@ -85,7 +96,6 @@ export default function AddProductPage() {
               />
               <span className="absolute left-4 top-3 text-sm font-bold text-gray-400">دج</span>
             </div>
-            <p className="text-[10px] text-amber-600 mt-1 font-medium">* سيقوم النظام تلقائياً بإضافة 500 دج للمشتري وخصم 500 دج من مستحقاتك عند التبادل حسب شروط المنصة.</p>
           </div>
 
           <button
