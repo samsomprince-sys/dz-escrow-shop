@@ -18,18 +18,21 @@ export default function MerchantDashboard() {
   const merchantId = "ضع_هنا_رقم_التاجر_لاحقا"; 
 
   useEffect(() => {
-    async function fetchWalletData() {
-      // جلب رصيد المحفظة الافتراضية للتاجر من جدول السيرفر
+        async function fetchWalletData() {
+      // جلب البيانات بدون اشتراط وجود سطر مسبق لمنع الأخطاء الحمراء
       const { data, error } = await supabase
         .from('merchant_wallets')
-        .select('total_earned_da, pending_withdrawal_da')
-        .single();
+        .select('total_earned_da, pending_withdrawal_da');
 
-      if (data) {
-        setWallet(data);
+      // إذا وجدنا بيانات التاجر نقوم بوضعها، وإذا كان الجدول فارغاً نتركها صفر
+      if (data && data.length > 0) {
+        setWallet(data[0]);
+      } else {
+        setWallet({ total_earned_da: 0, pending_withdrawal_da: 0 });
       }
       setLoading(false);
     }
+
 
     fetchWalletData();
   }, []);
