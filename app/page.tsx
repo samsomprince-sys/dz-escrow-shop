@@ -38,7 +38,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center" dir="rtl">
+    <div className="min-h-screen bg-slate-950 p-6 flex flex-col items-center" dir="rtl">
       
       {/* هيدر الموقع وشعار المنصة */}
       <div className="max-w-6xl w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 rounded-2xl shadow-xl border border-slate-800 text-center mb-8">
@@ -69,7 +69,7 @@ export default function HomePage() {
 
       {/* قسم عرض المنتجات الرقمية (Marketplace مثل Eneba) */}
       <div className="max-w-6xl w-full text-right">
-        <h2 className="text-xl font-bold text-gray-800 mb-6 border-r-4 border-blue-600 pr-3">المتجر الرقمي والألعاب المتاحة حالياً 🔥</h2>
+        <h2 className="text-xl font-bold text-white mb-6 border-r-4 border-blue-600 pr-3">المتجر الرقمي والألعاب المتاحة حالياً 🔥</h2>
 
         {loading ? (
           <div className="text-center py-12 text-gray-500">جاري جلب السلع الرقمية الحية من السيرفر...</div>
