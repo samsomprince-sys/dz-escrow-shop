@@ -1,29 +1,24 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 
 export default function AddProductPage() {
-  // متغيرات لحفظ بيانات المنتج المدخلة من التاجر
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // رقم معرف تاجر تجريبي (سيتم ربطه بحسابه الحقيقي عند إضافة نظام التسجيل لاحقاً)
   const merchantId = "99999999-9999-9999-9999-999999999999"; 
 
   async function handleAddProduct(e: React.FormEvent) {
     e.preventDefault();
-
     if (!title || !price) {
       alert('الرجاء إدخال اسم المنتج والسعر أولاً!');
       return;
     }
-
     setLoading(true);
 
-    // إدخال بيانات المنتج الرقمي في جدول المنتجات الحية داخل سوبابيز
     const { error } = await supabase
       .from('products')
       .insert([
@@ -42,7 +37,6 @@ export default function AddProductPage() {
       alert('حدث خطأ أثناء إضافة المنتج: ' + error.message);
     } else {
       alert('✓ تم نشر منتجك الرقمي بنجاح في قاعدة البيانات الحية!');
-      // تفريغ الخانات بعد النجاح
       setTitle('');
       setDescription('');
       setPrice('');
@@ -51,57 +45,49 @@ export default function AddProductPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center" dir="rtl">
-      <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-        
-        {/* رأس الصفحة */}
+      <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100 text-right">
         <div className="mb-6 border-b border-gray-100 pb-4">
           <h1 className="text-xl font-bold text-gray-800">إضافة منتج رقمي جديد 🎮</h1>
           <p className="text-xs text-gray-500 mt-1">أدخل تفاصيل سلعتك (بطاقات شحن، حسابات، أكواد ألعاب) لبيعها في المنصة.</p>
         </div>
 
-        {/* نموذج الإدخال */}
         <form onSubmit={handleAddProduct} className="space-y-4">
-          
-          {/* اسم المنتج */}
           <div>
-            <label className="block text-sm font-semibold text-gray-750 mb-1">اسم المنتج الرقمي:</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">اسم المنتج الرقمي:</label>
             <input
               type="text"
               placeholder="مثال: بطاقة فري فاير 210 جوهرة"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50"
+              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 text-right"
             />
           </div>
 
-          {/* وصف المنتج */}
           <div>
-            <label className="block text-sm font-semibold text-gray-750 mb-1">الوصف والشروط (اختياري):</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">الوصف والشروط (اختياري):</label>
             <textarea
               placeholder="اكتب شروط تسليم الكود أو تفاصيل الحساب..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 h-24 resize-none"
+              className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 h-24 resize-none text-right"
             />
           </div>
 
-          {/* سعر التاجر بالدينار الجزائري */}
           <div>
-            <label className="block text-sm font-semibold text-gray-750 mb-1">السعر الصافي الخاص بك (بالدج):</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">السعر الصافي الخاص بك (بالدج):</label>
             <div className="relative">
               <input
                 type="number"
                 placeholder="00.00"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full p-3 pl-12 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 font-bold"
+                className="w-full p-3 pl-12 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-green-500 bg-gray-50 font-bold text-right"
               />
               <span className="absolute left-4 top-3 text-sm font-bold text-gray-400">دج</span>
             </div>
             <p className="text-[10px] text-amber-600 mt-1 font-medium">* سيقوم النظام تلقائياً بإضافة 500 دج للمشتري وخصم 500 دج من مستحقاتك عند التبادل حسب شروط المنصة.</p>
           </div>
 
-          {/* زر النشر */}
           <button
             type="submit"
             disabled={loading}
@@ -109,7 +95,6 @@ export default function AddProductPage() {
           >
             {loading ? 'جاري نشر السلعة...' : '🚀 نشر المنتج في المتجر فوراً'}
           </button>
-
         </form>
       </div>
     </div>
