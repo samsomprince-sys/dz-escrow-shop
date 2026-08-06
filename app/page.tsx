@@ -42,7 +42,12 @@ export default function HomePage() {
       
       {/* هيدر الموقع وشعار المنصة */}
       <div className="max-w-6xl w-full bg-white p-8 rounded-2xl shadow-md border border-gray-100 text-center mb-8">
-        <h1 className="text-3xl font-extrabold text-blue-600 mb-2">منصة الضمان الجزائري 🇩🇿</h1>
+      {/* الشعار والأيقونة الرسمية للمنصة */}
+     <div className="flex flex-col items-center mb-4">
+       <img src="/logo.png" alt="شعار منصة الضمان" className="w-24 h-24 object-contain mb-3 rounded-full border border-gray-150 shadow-sm" />
+       <h1 className="text-3xl font-extrabold text-blue-600">منصة الضمان الجزائري 🇩🇿</h1>
+     </div>
+
         <p className="text-sm text-gray-500 mb-6">أفضل سوق P2P ونظام وسيط مالي (Escrow) لبيع المنتجات الرقمية عبر بريدي موب وعملات رقمية بأمان تام.</p>
 
         {/* أزرار الدخول السريعة للوحات التحكم */}
