@@ -44,7 +44,7 @@ export default function HomePage() {
       <div className="max-w-6xl w-full bg-white p-8 rounded-2xl shadow-md border border-gray-100 text-center mb-8">
       {/* الشعار والأيقونة الرسمية للمنصة */}
      <div className="flex flex-col items-center mb-4">
-       <img src="/logo.png" alt="شعار منصة الضمان" className="w-24 h-24 object-contain mb-3 rounded-full border border-gray-150 shadow-sm" />
+       <img src="/logo.png" alt="شعار منصة الضمان" className="w-32 h-32 object-cover mb-3 rounded-full border-2 border-blue-100 shadow-md" />
        <h1 className="text-3xl font-extrabold text-blue-600">منصة الضمان الجزائري 🇩🇿</h1>
      </div>
 
