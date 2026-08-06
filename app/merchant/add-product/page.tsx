@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
+import { FormEvent, useState } from 'react';
+import { supabase } from '../../../lib/supabase';
 
 export default function AddProductPage() {
   // متغيرات لحفظ بيانات المنتج المدخلة من التاجر
