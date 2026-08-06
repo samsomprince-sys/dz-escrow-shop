@@ -41,14 +41,17 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center" dir="rtl">
       
       {/* هيدر الموقع وشعار المنصة */}
-      <div className="max-w-6xl w-full bg-white p-8 rounded-2xl shadow-md border border-gray-100 text-center mb-8">
+      <div className="max-w-6xl w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 rounded-2xl shadow-xl border border-slate-800 text-center mb-8">
+
       {/* الشعار والأيقونة الرسمية للمنصة */}
      <div className="flex flex-col items-center mb-4">
        <img src="/logo.png" alt="شعار منصة الضمان" className="w-32 h-32 object-cover mb-3 rounded-full border-2 border-blue-100 shadow-md" />
-       <h1 className="text-3xl font-extrabold text-blue-600">منصة الضمان الجزائري 🇩🇿</h1>
+       <h1 className="text-3xl font-extrabold text-white mb-2">منصة الضمان الجزائري 🇩🇿</h1>
+
      </div>
 
-        <p className="text-sm text-gray-500 mb-6">أفضل سوق P2P ونظام وسيط مالي (Escrow) لبيع المنتجات الرقمية عبر بريدي موب وعملات رقمية بأمان تام.</p>
+        <p className="text-sm text-slate-300 mb-6 font-medium">أفضل سوق P2P ونظام وسيط مالي (Escrow) لبيع المنتجات الرقمية عبر بريدي موب وعملات رقمية بأمان تام.</p>
+
 
         {/* أزرار الدخول السريعة للوحات التحكم */}
         <div className="flex flex-wrap gap-4 justify-center border-t border-gray-100 pt-6">
