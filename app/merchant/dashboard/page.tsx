@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
@@ -31,6 +32,13 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
+  {/* زر الرجوع للرئيسية */}
+  <div className="max-w-7xl mx-auto mb-4 text-right">
+    <Link href="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-green-600 transition-colors">
+      ← العودة للصفحة الرئيسية للمنصة
+    </Link>
+  </div>
+
       {/* رأس الصفحة */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 text-right">
         <h1 className="text-2xl font-bold text-gray-800">لوحة تحكم التاجر المالي</h1>

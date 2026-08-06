@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -53,6 +54,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-6" dir="rtl">
+            {/* زر العودة للصفحة الرئيسية */}
+      <div className="max-w-7xl mx-auto mb-4">
+        <a href="/" className="inline-flex items-center text-sm font-semibold text-gray-400 hover:text-amber-400 transition-colors">
+          ← العودة للصفحة الرئيسية للمنصة
+        </a>
+      </div>
+
       {/* رأس لوحة التحكم */}
       <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-8">
         <h1 className="text-2xl font-bold text-amber-400">لوحة تحكم أمين المنصة (الأدمن)</h1>

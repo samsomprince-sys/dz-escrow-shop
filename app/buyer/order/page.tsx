@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
@@ -48,7 +49,14 @@ export default function BuyerOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center justify-center" dir="rtl">
+  {/* زر الرجوع للرئيسية */}
+  <div className="w-full max-w-md mb-4 text-right">
+    <Link href="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">
+      ← العودة للصفحة الرئيسية للمنصة
+    </Link>
+  </div>
+
       <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100">
         <h1 className="text-xl font-bold text-gray-800 mb-4">فاتورة الشراء وتأكيد الدفع 🛒</h1>
         
