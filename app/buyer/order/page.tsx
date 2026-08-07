@@ -89,15 +89,11 @@ function OrderContent() {
                 : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700"
             }`}
           >
-            <div className="w-6 h-6 relative">
-              {/* استدعاء صورة أيقونة USDT من مجلد public الساكن */}
-              <Image 
-                src="/usdt-icon.png" // تأكد من وضع الصورة بهذا الاسم تماماً داخل مجلد public في VS Code
-                alt="USDT"
-                fill
-                className="object-contain"
-              />
-            </div>
+            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+  <circle cx="12" cy="12" r="12" fill="#26A17B"/>
+  <path d="M12.83 7.82v1.44h2.72v1.65h-2.72v4.83c0 .54-.08.91-.25 1.1-.16.2-.44.29-.83.29-.25 0-.54-.04-.84-.11v-1.57c.17.03.32.05.44.05.27 0 .4-.21.4-.64V10.9H8.97V9.26h2.73V7.82H7.43V6h9.14v1.82h-3.74z" fill="white"/>
+</svg>
+
             <span className="text-sm font-semibold">عملة رقمية (USDT)</span>
           </button>
         </div>
