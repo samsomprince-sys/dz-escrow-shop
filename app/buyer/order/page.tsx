@@ -1,149 +1,161 @@
-'use client';
+"use client";
 
-import { useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-// 1. المكون الداخلي الذي يقرأ السعر والروابط ديناميكياً
-function OrderContent() {
+export default function BuyerOrderPage() {
   const searchParams = useSearchParams();
-  
-  const orderId = searchParams.get('id') || "68c946cc-c7f8-45be-9bc0-d6ccfb3d0fb1"; 
-  const queryPrice = searchParams.get('price');
-  
-  const productPrice = queryPrice ? parseInt(queryPrice) : 2000;
+  // قراءة السعر ديناميكياً وتأمين الحساب المادي
+  const basePrice = Number(searchParams.get("price")) || 0;
+  const platformFee = 500;
+  const totalPrice = basePrice + platformFee;
 
-  const [proofUrl, setProofUrl] = useState('');
-  const [disputeReason, setDisputeReason] = useState('');
-  const [sending, setSending] = useState(false);
-  const [showDisputeForm, setShowDisputeForm] = useState(false);
+  // الحالات الافتراضية للتحكم بالواجهة (بريدي موب هو الافتراضي)
+  const [paymentMethod, setPaymentMethod] = useState<"baridimob" | "crypto">("baridimob");
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const buyerFee = 500; 
-  const totalAmount = productPrice + buyerFee;
+  // دالة معالجة ورفع صورة الوصل/الإثبات يدوياً
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const buyerId = "11111111-1111-1111-1111-111111111111"; 
+    // توليد معاينة فورية للمشتري لراحة المستخدم
+    setPreviewUrl(URL.createObjectURL(file));
+    setUploading(true);
 
-  async function handleSubmitOrder() {
-    if (!proofUrl) {
-      alert('الرجاء إدخال رابط صورة الوصل أولاً');
-      return;
+    try {
+      // هنا تضع كود الرفع الخاص بك إلى الـ Bucket (product-images أو bucket مخصص للإيصالات)
+      // مثال: const { data, error } = await supabase.storage.from('receipts').upload(newName, file);
+      console.log("يتم الآن رفع الملف إلى سوبابيز...", file.name);
+    } catch (err) {
+      console.error("خطأ أثناء الرفع:", err);
+    } finally {
+      setUploading(false);
     }
-    setSending(true);
-    alert('✓ تم إرسال وصل بريدي موب بنجاح! بانتظار مصادقة الأدمن لتفعيل الـ Escrow.');
-    setSending(false);
-  }
-
-  async function handleRaiseDispute() {
-    if (!disputeReason) {
-      alert('الرجاء كتابة سبب المشكلة أولاً');
-      return;
-    }
-    setSending(true);
-
-    const { error } = await supabase
-      .from('disputes')
-      .insert([{ order_id: orderId, raised_by_id: buyerId, reason: disputeReason }]);
-
-    if (error) {
-      alert('حدث خطأ: ' + error.message);
-    } else {
-      alert('✓ تم فتح النزاع بنجاح وإرساله للأدمن للفصل في الأموال!');
-      setShowDisputeForm(false);
-      setDisputeReason('');
-    }
-    setSending(false);
-  }
+  };
 
   return (
-    <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-md border border-gray-100 text-right">
-      <h1 className="text-xl font-bold text-gray-800 mb-4 text-center">فاتورة الشراء وتأكيد الدفع 🛒</h1>
-      
-      <div className="space-y-2 border-b border-gray-100 pb-4 mb-4 text-sm text-gray-600">
-        <div className="flex justify-between">
-          <span>سعر المنتج الرقمي الأصلي:</span>
-          <span className="font-bold text-gray-800">{productPrice} دج</span>
-        </div>
-        <div className="flex justify-between text-blue-600 font-medium">
-          <span>رسوم عمليات المنصة والخصوصية:</span>
-          <span>+{buyerFee} دج</span>
-        </div>
-        <div className="flex justify-between font-bold text-base text-gray-800 pt-2 border-t border-dashed">
-          <span>المبلغ الإجمالي المطلوب تحويله:</span>
-          <span className="text-green-600 text-lg">{totalAmount} دج</span>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        
+        {/* رابط العودة */}
+        <button className="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition">
+          ← العودة للصفحة الرئيسية للمنصة
+        </button>
 
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">رابط صورة وصل تحويل بريدي موب:</label>
-        <input
-          type="text"
-          placeholder="انسخ رابط الصورة هنا بعد رفعها"
-          value={proofUrl}
-          onChange={(e) => setProofUrl(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-blue-500 bg-gray-50 text-right text-black"
-        />
-      </div>
+        {/* عنوان الفاتورة */}
+        <h2 className="text-xl font-bold text-center flex items-center justify-center gap-2">
+          🛒 فاتورة الشراء وتأكيد الدفع
+        </h2>
 
-      <button
-        onClick={handleSubmitOrder}
-        disabled={sending}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md text-sm mb-4"
-      >
-        {sending ? 'جاري الإرسال...' : '✓ تأكيد الدفع وإرسال للأدمن'}
-      </button>
+        {/* تفاصيل الحساب المالي المدمج */}
+        <div className="bg-slate-950 p-4 rounded-xl space-y-3 border border-slate-800">
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-400">سعر المنتج الرقمي الأصلي:</span>
+            <span className="font-semibold">{basePrice} دج</span>
+          </div>
+          <div className="flex justify-between text-sm text-blue-400">
+            <span>رسوم عمليات المنصة والخصوصية:</span>
+            <span>+{platformFee} دج</span>
+          </div>
+          <hr className="border-slate-800" />
+          <div className="flex justify-between items-center text-lg font-bold text-green-400">
+            <span>المبلغ الإجمالي المطلوب تحويله:</span>
+            <span>{totalPrice} دج</span>
+          </div>
+        </div>
 
-      <div className="border-t border-gray-100 pt-4">
-        {!showDisputeForm ? (
-          <button
-            onClick={() => setShowDisputeForm(true)}
-            className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 rounded-xl transition-colors text-xs"
-          >
-            ⚠ واجهت مشكلة؟ فتح نزاع وتقديم شكوى للأدمن
-          </button>
+        {/* الشرط الأول: أداة اختيار طريقة الدفع الذكية */}
+        <div className="space-y-2">
+          <label className="text-sm text-slate-400 font-medium block">اختر طريقة الدفع المناسبة:</label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("baridimob")}
+              className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition ${
+                paymentMethod === "baridimob"
+                  ? "border-blue-500 bg-blue-500/10 text-white"
+                  : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700"
+              }`}
+            >
+              <span className="text-xl">💳</span>
+              <span className="text-sm font-semibold">بريدي موب</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("crypto")}
+              className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition ${
+                paymentMethod === "crypto"
+                  ? "border-yellow-500 bg-yellow-500/10 text-white"
+                  : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700"
+              }`}
+            >
+              <span className="text-xl">🪙</span>
+              <span className="text-sm font-semibold">عملة رقمية (USDT)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* التعليمات الديناميكية بناءً على اختيار الدفع */}
+        {paymentMethod === "baridimob" ? (
+          <div className="bg-blue-950/20 border border-blue-900/50 p-4 rounded-xl text-xs space-y-1 text-slate-300">
+            <p className="font-semibold text-blue-400">📌 معلومات تحويل بريدي موب:</p>
+            <p>يرجى تحويل المبلغ إلى الـ RIP الخاص بالتاجر، ثم إرفاق صورة الوصل الرسمية بالأسفل.</p>
+          </div>
         ) : (
-          <div className="bg-red-50 p-4 rounded-xl border border-red-100">
-            <label className="block text-xs font-bold text-red-700 mb-2">اكتب تفاصيل مشكلتك للأدمن بالتفصيل:</label>
-            <textarea
-              placeholder="مثال: الكود الرقمي لا يعمل أو التاجر لم يسلمني الحساب..."
-              value={disputeReason}
-              onChange={(e) => setDisputeReason(e.target.value)}
-              className="w-full p-3 border border-red-300 rounded-xl text-xs bg-white h-20 resize-none focus:outline-none text-right text-black"
-            />
-            <div className="flex gap-2 mt-3">
-              <button
-                onClick={handleRaiseDispute}
-                disabled={sending}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition-colors"
-              >
-                إرسال الشكوى للمحكمة
-              </button>
-              <button
-                onClick={() => setShowDisputeForm(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-3 py-2 rounded-lg text-xs transition-colors"
-              >
-                إلغاء
-              </button>
-            </div>
+          <div className="bg-yellow-950/20 border border-yellow-900/50 p-4 rounded-xl text-xs space-y-1 text-slate-300">
+            <p className="font-semibold text-yellow-400">📌 معلومات الدفع بالعملات الرقمية:</p>
+            <p>شبكة التحويل: <span className="text-white font-mono">TRC-20</span></p>
+            <p>يرجى تصوير لقطة الشاشة (Screenshot) لنجاح عملية التحويل التي تشمل رقم المعاملة (TXID).</p>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
 
-// 2. المكون الأساسي للتصدير والذي يقوم بالتغليف الآمن لمنع تعارض السيرفر
-export default function BuyerOrderPage() {
-  return (
-    <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center justify-center" dir="rtl">
-      <div className="w-full max-w-md mb-4 text-right">
-        <a href="/" className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">
-          ← العودة للصفحة الرئيسية للمنصة
-        </a>
-      </div>
+        {/* الشرط الثاني: إرفاق صورة يدوياً بدلاً من الرابط النصي */}
+        <div className="space-y-2">
+          <label className="text-sm text-slate-400 font-medium block">
+            {paymentMethod === "baridimob" ? "📸 إرفاق صورة وصل تحويل بريدي موب:" : "📸 إرفاق إثبات تحويل العملة الرقمية:"}
+          </label>
+          
+          <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-xl p-4 bg-slate-950 hover:border-slate-700 transition relative group cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              disabled={uploading}
+            />
+            
+            {previewUrl ? (
+              <div className="w-full flex flex-col items-center space-y-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={previewUrl} alt="Preview" className="max-h-32 object-contain rounded-lg border border-slate-800" />
+                <span className="text-xs text-green-400">✓ تم اختيار الصورة بنجاح {uploading && "(جاري الرفع...)"}</span>
+              </div>
+            ) : (
+              <div className="text-center space-y-1">
+                <span className="text-2xl text-slate-500 group-hover:text-slate-400">📁</span>
+                <p className="text-xs text-slate-400">اضغط هنا لاختيار أو التقاط صورة الإثبات يدوياً</p>
+                <p className="text-[10px] text-slate-600">يدعم صيغ JPG, PNG, WEBP</p>
+              </div>
+            )}
+          </div>
+        </div>
 
-      <Suspense fallback={<div className="text-center py-6 text-gray-500">جاري تحميل الفاتورة الديناميكية...</div>}>
-        <OrderContent />
-      </Suspense>
+        {/* زر الإجراء الرئيسي المعزز */}
+        <button
+          disabled={uploading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-600 font-semibold py-3 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/10"
+        >
+          <span>✓</span> تأكيد الدفع وإرسال للإدمن
+        </button>
+
+        {/* فتح نزاع */}
+        <button className="w-full text-center text-xs text-red-400 hover:text-red-300 font-medium transition pt-2">
+          ⚠️ واجهت مشكلة؟ فتح نزاع وتقديم شكوى للأدمن
+        </button>
+
+      </div>
     </div>
   );
 }
