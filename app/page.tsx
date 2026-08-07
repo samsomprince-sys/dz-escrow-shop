@@ -73,16 +73,17 @@ export default function HomePage() {
                 <div key={product.id} className="bg-slate-900 rounded-2xl shadow-md border border-slate-800 overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all hover:scale-[1.01]">
                   
                   {/* 📸 عرض صورة الكرت التي رفعها التاجر ممتدة بالكامل بدون أي نقصان أو فراغات بيضاء مثل Binance */}
-                  <div className="relative w-full h-48 bg-slate-950">
-                    <img 
-                      src={product.image_url} 
-                      alt={product.title} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // حماية الكود: لو حدث عطل في رابط التاجر يضع السيرفر صورة حماية ممتلئة تلقائياً
-                        (e.target as HTMLImageElement).src = 'https://unsplash.com';
-                      }}
-                    />
+                    <div className="relative w-full h-48 bg-slate-950">
+                      {/* عرض صورة الكرت التي رفعها التاجر ممتدة بالكامل */}
+                      <img
+                        src={product.image_url}
+                        alt={product.title}
+                        className="w-full h-full object-contain p-4 bg-slate-950/40"
+                        onError={(e) => {
+                          // حماية الكود التلقائية لو حدث عطل في الرابط
+                          (e.target as HTMLImageElement).src = '/fallback.png';
+                        }}
+                      />
                     <span className="absolute top-3 right-3 text-[10px] bg-blue-600/90 text-white font-bold px-2 py-1 rounded-md backdrop-blur-sm">سلعة رقمية مؤمنة</span>
                   </div>
 
