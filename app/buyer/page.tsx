@@ -4,7 +4,6 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 
-// 1. المكون الداخلي الذي يدير البيانات والأزرار التفاعلية
 function OrderContent() {
   const searchParams = useSearchParams();
   
@@ -13,7 +12,7 @@ function OrderContent() {
   
   const productPrice = queryPrice ? parseInt(queryPrice) : 2000;
 
-  const [proofUrl, setProofUrl] = useState('');
+  const [proofFile, setProofFile] = useState<File | null>(null); // حفظ ملف الوصل الحقيقي
   const [disputeReason, setDisputeReason] = useState('');
   const [sending, setSending] = useState(false);
   const [showDisputeForm, setShowDisputeForm] = useState(false);
@@ -23,33 +22,56 @@ function OrderContent() {
 
   const buyerId = "11111111-1111-1111-1111-111111111111"; 
 
-  // دالة تأكيد الدفع لرفع الوصل للأدمن
+  // دالة رفع ملف الوصل وتحديث حالة الطلب للأدمن
   async function handleSubmitOrder() {
-    if (!proofUrl) {
-      alert('الرجاء إدخال رابط صورة الوصل أولاً');
+    if (!proofFile) {
+      alert('الرجاء إرفاق صورة وصل تحويل بريدي موب أولاً من جهازك!');
       return;
     }
     setSending(true);
-    
-    const { error } = await supabase
-      .from('escrow_orders')
-      .update({ 
-        status: 'waiting_admin_deposit_approval',
-        payment_proof_url: proofUrl,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId);
 
-    setSending(false);
+    let finalProofUrl = '';
 
-    if (error) {
-      alert('حدث خطأ أثناء إرسال الوصل: ' + error.message);
-    } else {
-      alert('✓ تم تأكيد الدفع وإرسال وصل بريدي موب بنجاح! بانتظار مصادقة الأدمن لتفعيل الـ Escrow وتجميد الأموال.');
+    try {
+      // 1. رفع ملف الوصل الحقيقي إلى مجلد التخزين السحابي بالسيرفر
+      const fileExtension = proofFile.name.split('.').pop();
+      const fileName = `proof-${Date.now()}.${fileExtension}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, proofFile);
+
+      if (uploadError) throw new Error('فشل رفع صورة الوصل: ' + uploadError.message);
+
+      // جلب الرابط المباشر للملف المرفوع ليراه الأدمن في لوحته
+      const { data: publicUrlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      finalProofUrl = publicUrlData.publicUrl;
+
+      // 2. تحديث بيانات وإثبات الصفقة للأدمن
+      const { error: updateError } = await supabase
+        .from('escrow_orders')
+        .update({ 
+          status: 'waiting_admin_deposit_approval',
+          payment_proof_url: finalProofUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
+
+      if (updateError) throw new Error(updateError.message);
+
+      alert('✓ تم رفع ملف صورة الوصل بنجاح! بانتظار مصادقة الأدمن لتفعيل الـ Escrow وتجميد الأموال.');
+      setProofFile(null);
+
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSending(false);
     }
   }
 
-  // دالة فتح النزاع وإرسال الشكوى الحية للمحكمة
   async function handleRaiseDispute() {
     if (!disputeReason) {
       alert('الرجاء كتابة سبب المشكلة بالتفصيل أولاً');
@@ -59,11 +81,7 @@ function OrderContent() {
 
     const { error } = await supabase
       .from('disputes')
-      .insert([{ 
-        order_id: orderId, 
-        raised_by_id: buyerId, 
-        reason: disputeReason 
-      }]);
+      .insert([{ order_id: orderId, raised_by_id: buyerId, reason: disputeReason }]);
 
     setSending(false);
 
@@ -80,7 +98,6 @@ function OrderContent() {
     <div className="max-w-md w-full bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-slate-800 text-right">
       <h1 className="text-xl font-bold text-white mb-4 text-center">فاتورة الشراء وتأكيد الدفع 🛒</h1>
       
-      {/* تفاصيل السعر */}
       <div className="space-y-2 border-b border-slate-800 pb-4 mb-4 text-sm text-slate-400">
         <div className="flex justify-between">
           <span>سعر المنتج الرقمي الأصلي:</span>
@@ -96,35 +113,38 @@ function OrderContent() {
         </div>
       </div>
 
-      {/* معلومات تحويل بريدي موب */}
       <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 mb-4 text-center">
         <p className="text-xs text-amber-400 font-bold mb-2">📋 معلومات تحويل بريدي موب:</p>
         <p className="text-sm text-slate-300">الحساب التابع للمنصة RIP:</p>
         <p className="text-base font-mono font-bold text-white bg-slate-900 p-2 rounded-lg mt-1 select-all">00799999002478845197</p>
       </div>
 
-      {/* خانة إدخال رابط الوصل */}
-      <div className="mb-4">
-        <label className="block text-xs font-semibold text-slate-300 mb-2">رابط صورة وصل تحويل بريدي موب:</label>
+      {/* 📸 التعديل الذكي الجديد: زر اختيار الصورة مباشرة من جهاز المشتري بدلاً من الرابط */}
+      <div className="mb-5">
+        <label className="block text-xs font-semibold text-slate-300 mb-2">إرفاق صورة وصل الدفع (بريدي موب):</label>
         <input
-          type="text"
-          placeholder="ضع رابط الصورة هنا بعد رفعها"
-          value={proofUrl}
-          onChange={(e) => setProofUrl(e.target.value)}
-          className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-right text-white"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              setProofFile(e.target.files[0]);
+            }
+          }}
+          className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 text-right file:ml-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-900 file:text-blue-200 hover:file:bg-blue-800 cursor-pointer"
         />
+        {proofFile && (
+          <p className="text-[11px] text-green-400 mt-1 font-medium">✓ تم إرفاق الملف وجاهز للرفع: {proofFile.name}</p>
+        )}
       </div>
 
-      {/* زر تأكيد الدفع المربوط بالدالة الحية */}
       <button
         onClick={handleSubmitOrder}
         disabled={sending}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md text-sm mb-4"
       >
-        {sending ? 'جاري معالجة وإرسال البيانات...' : '✓ تأكيد الدفع وإرسال للأدمن'}
+        {sending ? 'جاري معالجة ورفع صورة الوصل للإنترنت...' : '✓ تأكيد الدفع وإرسال للأدمن'}
       </button>
 
-      {/* نظام النزاعات والشكاوى */}
       <div className="border-t border-slate-800 pt-4">
         {!showDisputeForm ? (
           <button
@@ -165,7 +185,6 @@ function OrderContent() {
   );
 }
 
-// 2. المكون الأساسي للتصدير والتغليف الأمن
 export default function BuyerOrderPage() {
   return (
     <div className="min-h-screen bg-slate-950 p-6 flex flex-col items-center justify-center" dir="rtl">
