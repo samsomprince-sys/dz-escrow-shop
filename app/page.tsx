@@ -9,6 +9,7 @@ interface Product {
   title: string;
   description: string;
   base_price_da: number;
+  image_url: string; // قراءة خانة الصورة الجديدة
   status: string;
 }
 
@@ -22,7 +23,7 @@ export default function HomePage() {
     async function fetchProducts() {
       const { data } = await supabase
         .from('products')
-        .select('id, title, description, base_price_da, status')
+        .select('id, title, description, base_price_da, image_url, status')
         .eq('status', 'active');
 
       if (data) setProducts(data);
@@ -31,26 +32,10 @@ export default function HomePage() {
     fetchProducts();
   }, []);
 
-  // 💡 فكرة ذكية تلقائية: دالة لاختيار صورة الكرت بناءً على اسم المنتج المعروض
-  function getProductImage(title: string) {
-    const name = title.toLowerCase();
-    if (name.includes('netflix')) {
-      return 'https://unsplash.com'; // صورة نيتفليكس احترافية
-    }
-    if (name.includes('binance') || name.includes('usdt')) {
-      return 'https://unsplash.com'; // صورة عملات مشفرة لبايننس
-    }
-    if (name.includes('pubg') || name.includes('fire')) {
-      return 'https://unsplash.com'; // صورة ألعاب ومجرات جذابة
-    }
-    // صورة افتراضية كرت هدايا رسمي إذا لم يتطابق الاسم
-    return 'https://unsplash.com';
-  }
-
   return (
     <div className="min-h-screen bg-slate-950 p-6 flex flex-col items-center" dir="rtl">
       
-      {/* المستطيل الفخم المحدث بالخلفية الداكنة */}
+      {/* المستطيل الفخم الترحيبي */}
       <div className="max-w-6xl w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 rounded-2xl shadow-xl border border-slate-800 text-center mb-8">
         <div className="flex flex-col items-center mb-4">
           <img src="/logo.png" alt="شعار منصة الضمان" className="w-32 h-32 object-cover mb-3 rounded-full border-2 border-blue-100 shadow-md" />
@@ -71,16 +56,14 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* قسم المتجر الرقمي */}
+      {/* قسم المتجر وعرض الكروت الأنيقة الممتلئة تماماً بالصور */}
       <div className="max-w-6xl w-full text-right">
         <h2 className="text-xl font-bold text-white mb-6 border-r-4 border-blue-600 pr-3">المتجر الرقمي والألعاب المتاحة حالياً 🔥</h2>
 
         {loading ? (
           <div className="text-center py-12 text-slate-400">جاري جلب السلع الرقمية الحية من السيرفر...</div>
         ) : products.length === 0 ? (
-          <div className="text-center py-12 bg-slate-900 rounded-2xl border border-slate-800 text-slate-400">
-            لا توجد منتجات معروضة حالياً.
-          </div>
+          <div className="text-center py-12 bg-slate-900 rounded-2xl border border-slate-800 text-slate-400">لا توجد منتجات معروضة حالياً.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {products.map((product) => {
@@ -89,37 +72,32 @@ export default function HomePage() {
               return (
                 <div key={product.id} className="bg-slate-900 rounded-2xl shadow-md border border-slate-800 overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all hover:scale-[1.01]">
                   
-                  {/* 📸 الجزء الذكي الجديد: صورة الكرت ممتدة تملأ أعلى الخانة تماماً مثل Eneba */}
-                  <div className="relative w-full h-44 bg-slate-950">
+                  {/* 📸 عرض صورة الكرت التي رفعها التاجر ممتدة بالكامل بدون أي نقصان أو فراغات بيضاء مثل Binance */}
+                  <div className="relative w-full h-48 bg-slate-950">
                     <img 
-                      src={getProductImage(product.title)} 
+                      src={product.image_url} 
                       alt={product.title} 
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // حماية الكود: لو حدث عطل في رابط التاجر يضع السيرفر صورة حماية ممتلئة تلقائياً
+                        (e.target as HTMLImageElement).src = 'https://unsplash.com';
+                      }}
                     />
-                    <span className="absolute top-3 right-3 text-[10px] bg-blue-600/90 text-white font-bold px-2 py-1 rounded-md backdrop-blur-sm">
-                      سلعة رقمية مؤمنة
-                    </span>
+                    <span className="absolute top-3 right-3 text-[10px] bg-blue-600/90 text-white font-bold px-2 py-1 rounded-md backdrop-blur-sm">سلعة رقمية مؤمنة</span>
                   </div>
 
-                  {/* نصوص وتفاصيل المنتج */}
                   <div className="p-5 flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="text-base font-bold text-white line-clamp-1 mb-1">{product.title}</h3>
-                      <p className="text-xs text-slate-400 line-clamp-2 bg-slate-950 p-2.5 rounded-xl border border-slate-850 h-12">
-                        {product.description || 'لا يوجد وصف متاح لهذا المنتج.'}
-                      </p>
+                      <p className="text-xs text-slate-400 line-clamp-2 bg-slate-950 p-2.5 rounded-xl border border-slate-850 h-12">{product.description || 'لا يوجد وصف متاح.'}</p>
                     </div>
 
-                    {/* السعر وزر الشراء السفلي */}
                     <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] text-slate-500">السعر الإجمالي:</p>
+                        <p className="text-[10px] text-slate-500">السعر الإجمالي للشراء:</p>
                         <p className="text-lg font-black text-green-400">{finalBuyerPrice} <span className="text-xs font-normal text-slate-400">دج</span></p>
                       </div>
-                      <Link 
-                        href={`/buyer/order?id=${product.id}&price=${product.base_price_da}`}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm"
-                      >
+                      <Link href={`/buyer/order?id=${product.id}&price=${product.base_price_da}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm">
                         شراء الآن ←
                       </Link>
                     </div>
@@ -131,7 +109,6 @@ export default function HomePage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }
