@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image"; // استيراد مكون الصور الرسمي لمنع بطء التصفح
+import Link from "next/link";
 
 function OrderContent() {
   const searchParams = useSearchParams();
@@ -35,9 +36,13 @@ function OrderContent() {
   return (
     <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
       {/* رابط العودة */}
-      <button className="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition">
+      <Link
+        href="/"
+        className="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition inline-flex mb-4"
+      >
         ← العودة للصفحة الرئيسية للمنصة
-      </button>
+      </Link>
+
 
       {/* عنوان الفاتورة */}
       <h2 className="text-xl font-bold text-center flex items-center justify-center gap-2">
