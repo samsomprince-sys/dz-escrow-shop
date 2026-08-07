@@ -98,7 +98,7 @@ export default function HomePage() {
                         <p className="text-[10px] text-slate-500">السعر الإجمالي للشراء:</p>
                         <p className="text-lg font-black text-green-400">{finalBuyerPrice} <span className="text-xs font-normal text-slate-400">دج</span></p>
                       </div>
-                      <Link href={`/buyer/order?id=${product.id}&price=${product.base_price_da}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm">
+                      <Link href={`/buyer?id=${product.id}&price=${product.base_price_da}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm">
                         شراء الآن ←
                       </Link>
                     </div>
