@@ -2,12 +2,12 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image"; // استيراد مكون الصور الرسمي لمنع بطء التصفح
 
-// 1. المكون الفرعي الذي يحتوي على كل واجهات وتدفقات الشراء
 function OrderContent() {
   const searchParams = useSearchParams();
   
-  // قراءة السعر وتأمين الحسابات
+  // حساب المبالغ والرسوم
   const basePrice = Number(searchParams.get("price")) || 0;
   const platformFee = 500;
   const totalPrice = basePrice + platformFee;
@@ -24,9 +24,9 @@ function OrderContent() {
     setUploading(true);
 
     try {
-      console.log("يتم الآن رفع الملف إلى سوبابيز...", file.name);
+      console.log("جاري معالجة ورفع الملف السحابي...", file.name);
     } catch (err) {
-      console.error("خطأ أثناء الرفع:", err);
+      console.error("حدث خطأ أثناء الرفع:", err);
     } finally {
       setUploading(false);
     }
@@ -44,7 +44,7 @@ function OrderContent() {
         🛒 فاتورة الشراء وتأكيد الدفع
       </h2>
 
-      {/* تفاصيل الحساب المالي المدمج */}
+      {/* تفاصيل الحساب المالي */}
       <div className="bg-slate-950 p-4 rounded-xl space-y-3 border border-slate-800">
         <div className="flex justify-between text-sm">
           <span className="text-slate-400">سعر المنتج الرقمي الأصلي:</span>
@@ -61,14 +61,15 @@ function OrderContent() {
         </div>
       </div>
 
-      {/* أداة اختيار طريقة الدفع الذكية */}
+      {/* أداة اختيار طريقة الدفع المزدوجة المعدلة */}
       <div className="space-y-2">
         <label className="text-sm text-slate-400 font-medium block">اختر طريقة الدفع المناسبة:</label>
         <div className="grid grid-cols-2 gap-3">
+          {/* خيار بريدي موب */}
           <button
             type="button"
             onClick={() => setPaymentMethod("baridimob")}
-            className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition ${
+            className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition ${
               paymentMethod === "baridimob"
                 ? "border-blue-500 bg-blue-500/10 text-white"
                 : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700"
@@ -77,36 +78,51 @@ function OrderContent() {
             <span className="text-xl">💳</span>
             <span className="text-sm font-semibold">بريدي موب</span>
           </button>
+
+          {/* خيار USDT المعدل بإدراج أيقونة الـ PNG الخاصة بك */}
           <button
             type="button"
             onClick={() => setPaymentMethod("crypto")}
-            className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition ${
+            className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition ${
               paymentMethod === "crypto"
                 ? "border-yellow-500 bg-yellow-500/10 text-white"
                 : "border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700"
             }`}
           >
-            <span className="text-xl">🪙</span>
+            <div className="w-6 h-6 relative">
+              {/* استدعاء صورة أيقونة USDT من مجلد public الساكن */}
+              <Image 
+                src="/usdt-icon.png" // تأكد من وضع الصورة بهذا الاسم تماماً داخل مجلد public في VS Code
+                alt="USDT"
+                fill
+                className="object-contain"
+              />
+            </div>
             <span className="text-sm font-semibold">عملة رقمية (USDT)</span>
           </button>
         </div>
       </div>
 
-      {/* التعليمات الديناميكية */}
+      {/* بوكس التعليمات المحدث بناءً على طلبك والتعديل الحركي للـ RIP */}
       {paymentMethod === "baridimob" ? (
-        <div className="bg-blue-950/20 border border-blue-900/50 p-4 rounded-xl text-xs space-y-1 text-slate-300">
-          <p className="font-semibold text-blue-400">📌 معلومات تحويل بريدي موب:</p>
-          <p>يرجى تحويل المبلغ إلى الـ RIP الخاص بالتاجر، ثم إرفاق صورة الوصل الرسمية بالأسفل.</p>
+        <div className="bg-blue-950/20 border border-blue-900/50 p-4 rounded-xl text-xs space-y-2 text-slate-300">
+          <p className="font-semibold text-blue-400 text-sm flex items-center gap-1">📌 معلومات تحويل بريدي موب:</p>
+          <p className="text-slate-400">يرجى تحويل المبلغ الإجمالي المطلوب بدقة إلى رقم الـ RIP التالي التابع للمنصة:</p>
+          <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between font-mono text-white text-center tracking-wider text-sm select-all">
+            {/* رقم الـ RIP الذي حددته بدقة */}
+            00799999002478845197
+          </div>
+          <p className="text-[11px] text-slate-400 italic">بعد إتمام عملية التحويل بنجاح، يرجى إرفاق صورة الوصل يدوياً بالأسفل لحجز الأموال في الضمان.</p>
         </div>
       ) : (
-        <div className="bg-yellow-950/20 border border-yellow-900/50 p-4 rounded-xl text-xs space-y-1 text-slate-300">
-          <p className="font-semibold text-yellow-400">📌 معلومات الدفع بالعملات الرقمية:</p>
-          <p>شبكة التحويل: <span className="text-white font-mono">TRC-20</span></p>
-          <p>يرجى تصوير لقطة الشاشة (Screenshot) لنجاح عملية التحويل التي تشمل رقم المعاملة (TXID).</p>
+        <div className="bg-yellow-950/20 border border-yellow-900/50 p-4 rounded-xl text-xs space-y-2 text-slate-300">
+          <p className="font-semibold text-yellow-400 text-sm flex items-center gap-1">📌 معلومات الدفع بالعملات الرقمية:</p>
+          <p>شبكة التحويل المعتمدة: <span className="text-white font-mono font-bold">TRC-20</span></p>
+          <p className="text-slate-400">يرجى تصوير لقطة الشاشة (Screenshot) لنجاح عملية التحويل التي تشمل رقم المعاملة الواضح (TXID) لتأكيد المعاملة.</p>
         </div>
       )}
 
-      {/* إرفاق صورة يدوياً */}
+      {/* مكان إرفاق صورة الإثبات يدوياً */}
       <div className="space-y-2">
         <label className="text-sm text-slate-400 font-medium block">
           {paymentMethod === "baridimob" ? "📸 إرفاق صورة وصل تحويل بريدي موب:" : "📸 إرفاق إثبات تحويل العملة الرقمية:"}
@@ -123,8 +139,9 @@ function OrderContent() {
           
           {previewUrl ? (
             <div className="w-full flex flex-col items-center space-y-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={previewUrl} alt="Preview" className="max-h-32 object-contain rounded-lg border border-slate-800" />
-              <span className="text-xs text-green-400">✓ تم اختيار الصورة بنجاح {uploading && "(جاري الرفع...)"}</span>
+              <span className="text-xs text-green-400 font-medium">✓ تم تحديد إثبات الدفع {uploading && "(جاري الرفع...)"}</span>
             </div>
           ) : (
             <div className="text-center space-y-1">
@@ -135,7 +152,7 @@ function OrderContent() {
         </div>
       </div>
 
-      {/* زر الإجراء الرئيسي */}
+      {/* زر الإجراء الرئيسي المعزز */}
       <button
         disabled={uploading}
         className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-600 font-semibold py-3 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/10"
@@ -151,7 +168,6 @@ function OrderContent() {
   );
 }
 
-// 2. المكون الرئيسي الافتراضي للملف الذي يقوم بعملية العزل التام لمنع أخطاء Prerendering
 export default function BuyerOrderPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
