@@ -1,39 +1,47 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 
 function OrderContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const orderId = searchParams.get('id') || "68c946cc-c7f8-45be-9bc0-d6ccfb3d0fb1"; 
   const queryPrice = searchParams.get('price');
-  
   const productPrice = queryPrice ? parseInt(queryPrice) : 2000;
 
-  const [proofFile, setProofFile] = useState<File | null>(null); // حفظ ملف الوصل الحقيقي
+  const [proofFile, setProofFile] = useState<File | null>(null);
   const [disputeReason, setDisputeReason] = useState('');
   const [sending, setSending] = useState(false);
   const [showDisputeForm, setShowDisputeForm] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const buyerFee = 500; 
   const totalAmount = productPrice + buyerFee;
 
-  const buyerId = "11111111-1111-1111-1111-111111111111"; 
+  // 🛡️ فحص إجبارية الحساب للمشتري
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('🔒 عذراً، يجب عليك تسجيل الدخول أو إنشاء حساب أولاً لتتمكن من الشراء وتفعيل الضمان المالي!');
+        router.push('/merchant/auth'); // تحويل المشتري لصفحة التسجيل الموحدة
+      } else {
+        setCheckingAuth(false);
+      }
+    }
+    checkUser();
+  }, [router]);
 
-  // دالة رفع ملف الوصل وتحديث حالة الطلب للأدمن
   async function handleSubmitOrder() {
     if (!proofFile) {
       alert('الرجاء إرفاق صورة وصل تحويل بريدي موب أولاً من جهازك!');
       return;
     }
     setSending(true);
-
-    let finalProofUrl = '';
-
     try {
-      // 1. رفع ملف الوصل الحقيقي إلى مجلد التخزين السحابي بالسيرفر
       const fileExtension = proofFile.name.split('.').pop();
       const fileName = `proof-${Date.now()}.${fileExtension}`;
       
@@ -43,28 +51,25 @@ function OrderContent() {
 
       if (uploadError) throw new Error('فشل رفع صورة الوصل: ' + uploadError.message);
 
-      // جلب الرابط المباشر للملف المرفوع ليراه الأدمن في لوحته
       const { data: publicUrlData } = supabase.storage
         .from('product-images')
         .getPublicUrl(fileName);
 
-      finalProofUrl = publicUrlData.publicUrl;
+      const { data: { session } } = await supabase.auth.getSession();
 
-      // 2. تحديث بيانات وإثبات الصفقة للأدمن
       const { error: updateError } = await supabase
         .from('escrow_orders')
         .update({ 
           status: 'waiting_admin_deposit_approval',
-          payment_proof_url: finalProofUrl,
+          payment_proof_url: publicUrlData.publicUrl,
+          buyer_id: session?.user.id, // ربط الطلب بمعرّف المشتري الحقيقي المسجل
           updated_at: new Date().toISOString()
         })
         .eq('id', orderId);
 
       if (updateError) throw new Error(updateError.message);
-
-      alert('✓ تم رفع ملف صورة الوصل بنجاح! بانتظار مصادقة الأدمن لتفعيل الـ Escrow وتجميد الأموال.');
+      alert('✓ تم رفع الوصل بنجاح! بانتظار مصادقة الأدمن لحجز الأموال.');
       setProofFile(null);
-
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -78,20 +83,28 @@ function OrderContent() {
       return;
     }
     setSending(true);
+    const { data: { session } } = await supabase.auth.getSession();
 
     const { error } = await supabase
       .from('disputes')
-      .insert([{ order_id: orderId, raised_by_id: buyerId, reason: disputeReason }]);
+      .insert([{ 
+        order_id: orderId, 
+        raised_by_id: session?.user.id, // ربط النزاع بصاحب الحساب المشتكي
+        reason: disputeReason 
+      }]);
 
     setSending(false);
-
     if (error) {
-      alert('حدث خطأ أثناء إرسال الشكوى: ' + error.message);
+      alert('حدث خطأ: ' + error.message);
     } else {
-      alert('✓ تم فتح النزاع بنجاح وإرساله لمحكمة المنصة! الأدمن سيفصل في الأموال ويراجع القضية الآن.');
+      alert('✓ تم فتح النزاع بنجاح وإرساله للمحكمة!');
       setShowDisputeForm(false);
       setDisputeReason('');
     }
+  }
+
+  if (checkingAuth) {
+    return <div className="text-center py-12 text-slate-400">جاري فحص صلاحيات الأمان والولوج...</div>;
   }
 
   return (
@@ -119,7 +132,6 @@ function OrderContent() {
         <p className="text-base font-mono font-bold text-white bg-slate-900 p-2 rounded-lg mt-1 select-all">00799999002478845197</p>
       </div>
 
-      {/* 📸 التعديل الذكي الجديد: زر اختيار الصورة مباشرة من جهاز المشتري بدلاً من الرابط */}
       <div className="mb-5">
         <label className="block text-xs font-semibold text-slate-300 mb-2">إرفاق صورة وصل الدفع (بريدي موب):</label>
         <input
@@ -142,7 +154,7 @@ function OrderContent() {
         disabled={sending}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md text-sm mb-4"
       >
-        {sending ? 'جاري معالجة ورفع صورة الوصل للإنترنت...' : '✓ تأكيد الدفع وإرسال للأدمن'}
+        {sending ? 'جاري معالجة ورفع صورة الوصل...' : '✓ تأكيد الدفع وإرسال للأدمن'}
       </button>
 
       <div className="border-t border-slate-800 pt-4">
@@ -193,7 +205,6 @@ export default function BuyerOrderPage() {
           ← العودة للصفحة الرئيسية للمنصة
         </a>
       </div>
-
       <Suspense fallback={<div className="text-center py-6 text-slate-400">جاري تحميل الفاتورة المؤمنة...</div>}>
         <OrderContent />
       </Suspense>
