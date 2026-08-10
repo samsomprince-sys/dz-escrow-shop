@@ -83,7 +83,6 @@ export default function HomePage() {
   const buyerFee = 500;
   const t = translations[lang];
 
-  // 💡 قراءة اللغة المحفوظة فور فتح الموقع لمنع التغيير التلقائي
   useEffect(() => {
     const savedLang = localStorage.getItem('platform_lang') as LangKey;
     if (savedLang && translations[savedLang]) {
@@ -91,7 +90,6 @@ export default function HomePage() {
     }
   }, []);
 
-  // 💾 دالة تغيير اللغة وحفظها في ذاكرة المتصفح المستمرة
   const changeLanguage = (newLang: LangKey) => {
     setLang(newLang);
     localStorage.setItem('platform_lang', newLang);
@@ -123,11 +121,7 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 gap-1.5">
             <span className="text-slate-400 text-xs font-semibold">{t.langLabel}:</span>
-            <select 
-              value={lang} 
-              onChange={(e) => changeLanguage(e.target.value as LangKey)} 
-              className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer"
-            >
+            <select value={lang} onChange={(e) => changeLanguage(e.target.value as LangKey)} className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer">
               <option value="ar" className="bg-slate-900 text-white">العربية (AR)</option>
               <option value="fr" className="bg-slate-900 text-white">Français (FR)</option>
               <option value="en" className="bg-slate-900 text-white">English (EN)</option>
@@ -163,9 +157,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ركن كروت عرض المنتجات */}
-      <div className="max-w-6xl w-full text-right">
-        <h2 className={`text-xl font-bold text-white mb-6 border-blue-600 pr-3 ${lang === 'ar' ? 'border-r-4 pr-3 text-right' : 'border-l-4 pl-3 text-left'}`}>{t.marketTitle}</h2>
+      {/* ركن كروت عرض المنتجات المصلح بالكامل */}
+      <div className="max-w-6xl w-full">
+        <h2 className={`text-xl font-bold text-white mb-6 border-blue-600 ${lang === 'ar' ? 'border-r-4 pr-3 text-right' : 'border-l-4 pl-3 text-left'}`}>{t.marketTitle}</h2>
 
         {loading ? (
           <div className="text-center py-12 text-slate-400">{t.loading}</div>
@@ -178,22 +172,39 @@ export default function HomePage() {
 
               return (
                 <div key={product.id} className="bg-slate-900 rounded-2xl shadow-md border border-slate-800 overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all hover:scale-[1.01]">
+                  
+                  {/* عرض صورة الكرت ممتلئة ومحتواة بأناقة شديدة */}
                   <div className="relative w-full h-48 bg-slate-950">
-                    <img src={product.image_url} alt={product.title} className="w-full h-full object-contain p-4 bg-slate-950/40" onError={(e) => { (e.target as HTMLImageElement).src = 'https://unsplash.com'; }} />
+                    <img 
+                      src={product.image_url} 
+                      alt={product.title} 
+                      className="w-full h-full object-contain p-4 bg-slate-950/40"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://unsplash.com';
+                      }}
+                    />
                     <span className={`absolute top-3 text-[10px] bg-blue-600/90 text-white font-bold px-2 py-1 rounded-md backdrop-blur-sm ${lang === 'ar' ? 'right-3' : 'left-3'}`}>{t.secured}</span>
                   </div>
 
-                  <div className="p-5 flex-1 flex flex-col justify-between">
-                    <div className={lang === 'ar' ? 'text-right' : 'text-left'}>
+                  {/* نصوص تفاصيل المنتج بالتناوب الذكي للغات */}
+                  <div className={`p-5 flex-1 flex flex-col justify-between ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                    <div>
                       <h3 className="text-base font-bold text-white line-clamp-1 mb-1">{product.title}</h3>
                       <p className="text-xs text-slate-400 line-clamp-2 bg-slate-950 p-2.5 rounded-xl border border-slate-850 h-12">{product.description || t.noDesc}</p>
                     </div>
 
+                    {/* السعر وزر الشراء المنفصل برمجيًا لضمان ثبات الظهور */}
                     <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between">
-                      <div className={lang === 'ar' ? 'text-right' : 'text-left'}>
+                      <div>
                         <p className="text-[10px] text-slate-500">{t.priceLabel}</p>
-                        <p className="text-lg font-black text-green-400">{finalBuyerPrice} <span className="text-xs font-normal text-slate-400">{t.currency}</span></p>
+                        <p className="text-sm font-bold text-white">{finalBuyerPrice.toLocaleString()} {t.currency}</p>
                       </div>
+                      <Link
+                        href={`/merchant/product/${product.id}?lang=${lang}`}
+                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all"
+                      >
+                        {t.buyBtn}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -205,3 +216,4 @@ export default function HomePage() {
     </div>
   );
 }
+
