@@ -225,98 +225,33 @@ export default function HomePage() {
 
       {/* 🛠️ الهيكلة المتقدمة للمتجر: شريط جانبي + ركن المنتجات مثل G2A تماماً */}
       <div className="max-w-7xl w-full flex flex-col md:flex-row gap-6">
-        {/* 2️⃣ الركن الأيسر: شريط الترتيب العلوي وبطاقات عرض المنتجات */}
-<div className="flex-1 flex flex-col">
-  
-  {/* شريط الترتيب العلوي المماثل لموقع G2A تماماً */}
-  <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 mb-6 flex flex-wrap justify-between items-center gap-4">
-    <h2 className="text-base font-bold text-white pr-2">{t.marketTitle}</h2>
-    
-    {/* أداة الترتيب الذكية المأخوذة من لقطة الشاشة */}
-    <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5">
-      <span className="text-slate-400 text-xs font-semibold">{t.sortBy}</span>
-      <select 
-        value={sortBy} 
-        onChange={(e) => setSortBy(e.target.value)}
-        className="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer"
-      >
-        <option value="best" className="bg-slate-900 text-white">{t.sortBest}</option>
-        <option value="low-high" className="bg-slate-900 text-white">{t.sortLowHigh}</option>
-        <option value="high-low" className="bg-slate-900 text-white">{t.sortHighLow}</option>
-      </select>
-    </div>
-  </div>
-
-  {/* شبكة عرض كروت المنتجات الرقمية (Grid Layout) */}
-  {loading ? (
-    <div className="text-center py-12 text-slate-400">{t.loading}</div>
-  ) : filteredProducts.length === 0 ? (
-    <div className="text-center py-12 bg-slate-900 rounded-2xl border border-slate-800 text-slate-400">{t.noProducts}</div>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {filteredProducts.map((product) => {
-        // تطبيق شرط المنصة الصارم: السعر الإجمالي = سعر البائع + 500 دج عمولة وثبات المنصة
-        const finalBuyerPrice = product.base_price_da + buyerFee;
-
-        return (
-          <div key={product.id} className="bg-slate-900 rounded-2xl shadow-md border border-slate-800 overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all hover:scale-[1.01]">
-            
-            {/* 📸 جزء احتواء الصورة وحمايتها من الاقتصاص */}
-            <div className="relative w-full h-48 bg-slate-950">
-              <img 
-                src={product.image_url} 
-                alt={product.title} 
-                className="w-full h-full object-contain p-4 bg-slate-950/40"
-                onError={(e) => {
-                  // صورة حماية افتراضية في حال تلف الرابط
-                  (e.target as HTMLImageElement).src = 'https://unsplash.com';
-                }}
-              />
-              {/* شارة الضمان المالي */}
-              <span className={`absolute top-3 text-[10px] bg-blue-600/90 text-white font-bold px-2 py-1 rounded-md backdrop-blur-sm ${lang === 'ar' ? 'right-3' : 'left-3'}`}>
-                {t.secured}
-              </span>
-            </div>
-
-            {/* تفاصيل السلعة وأزرار الشراء */}
-            <div className="p-5 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-white line-clamp-1 mb-1 text-right">{product.title}</h3>
-                <p className="text-xs text-slate-400 line-clamp-2 bg-slate-950 p-2.5 rounded-xl border border-slate-850 h-12 text-right">
-                  {product.description || t.noDesc}
-                </p>
-              </div>
-
-              {/* السعر النهائي الإجمالي وزر الشراء المباشر لصفحة الفاتورة */}
-              <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-slate-500 text-right">{t.priceLabel}</p>
-                  <p className="text-base font-black text-green-400">
-                    {finalBuyerPrice} <span className="text-xs font-normal text-slate-400">{t.currency}</span>
-                  </p>
-                </div>
-                <Link 
-                  href={`/buyer?id=${product.id}&price=${product.base_price_da}&lang=${lang}`} 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm"
-                >
-                  {t.buyBtn}
-                </Link>
-              </div>
-            </div>
-
-          </div>
-        );
-      })}
-    </div>
-  )}
-</div>
-
-        
-        {/* 1️⃣ الركن الأيمن: شريط التصفية الجانبي (Filters) */}
+        {/* 1️⃣ الركن الأيمن: شريط التصفية الجانبي (Filters) المصلح بالكامل */}
         <div className="w-full md:w-64 bg-slate-900 rounded-2xl border border-slate-800 p-5 h-fit text-right">
-        </div>
-      </div>
+          <h3 className="text-sm font-bold text-white border-b border-slate-800 pb-3 mb-4 flex items-center gap-2">
+            <span>🔍</span> {t.filterTitle}
+          </h3>
+          
+          {/* فلتر تصفية الأسعار بالدينار الجزائري الحية */}
+          <div className="space-y-3">
+            <label className="block text-xs font-semibold text-slate-400">{t.filterPrice}</label>
+            <div className="flex gap-2" dir="ltr">
+              <input 
+                type="number" 
+                placeholder={t.toPrice}
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-1/2 bg-slate-950 text-white border border-slate-800 rounded-xl py-2 px-3 text-xs text-center focus:outline-none focus:border-blue-500 text-black"
+              />
+              <input 
+                type="number" 
+                placeholder={t.fromPrice}
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-1/2 bg-slate-950 text-white border border-slate-800 rounded-xl py-2 px-3 text-xs text-center focus:outline-none focus:border-blue-500 text-black"
+              />
+            </div>
+          </div>
+        </div>      </div>
     </div>
   );
 }
-
